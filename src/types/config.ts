@@ -24,6 +24,8 @@ export type SiteConfig = {
 	site: string;
 	base?: string;
 	title: string;
+	/** 首页浏览器标签标题；未配置时回退为“站点标题 - 副标题”。 */
+	browserTitle?: string;
 	subtitle: string;
 	topAppBar: {
 		/** 桌面端标题与导航内容组的对齐方式。 */

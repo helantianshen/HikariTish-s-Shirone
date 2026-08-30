@@ -10,8 +10,9 @@ test.describe("Feed and Subscription System", () => {
 		const text = await response.text();
 		expect(text).toContain('<rss version="2.0"');
 		expect(text).toContain("<channel>");
-		expect(text).toContain("<title>Shirone</title>");
-		expect(text).toContain("<item>");
+		expect(text).toContain("<title>HikariTish</title>");
+		expect(text).toContain("<title>Docker常用命令</title>");
+		expect(text.match(/<item>/g)).toHaveLength(56);
 	});
 
 	test("serves valid Atom 1.0 XML feed with correct content type", async ({
@@ -25,10 +26,11 @@ test.describe("Feed and Subscription System", () => {
 		const text = await response.text();
 		expect(text).toContain('<?xml version="1.0" encoding="utf-8"?>');
 		expect(text).toContain(
-			'<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">',
+			'<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh_CN">',
 		);
-		expect(text).toContain("<title>Shirone</title>");
-		expect(text).toContain("<entry>");
+		expect(text).toContain("<title>HikariTish</title>");
+		expect(text).toContain("<title>Docker常用命令</title>");
+		expect(text.match(/<entry>/g)).toHaveLength(56);
 		expect(text).toContain('<content type="html">');
 	});
 

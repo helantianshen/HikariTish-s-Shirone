@@ -1,6 +1,16 @@
 import { expect, test } from "@playwright/test";
 
-const PROJECT_COUNT = 3;
+const PROJECT_COUNT = 8;
+const PROJECT_KEYS = [
+	"gantry",
+	"oss-sync",
+	"cmp",
+	"mcpp",
+	"fish-breeding-manager",
+	"jianjia-nexus-website",
+	"novagate",
+	"novanexus",
+];
 
 test.describe("项目页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -8,53 +18,80 @@ test.describe("项目页", () => {
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
 	});
 
-	test("渲染代表项目、阶段、技术栈与源码链接", async ({ page }) => {
+	test("按指定顺序渲染项目、阶段、技术栈与源码链接", async ({ page }) => {
 		await expect(page.locator("#swup-container")).toHaveAttribute(
 			"data-current-page",
 			"projects",
 		);
-		await expect(page.locator(".page-header__title")).toHaveText("Projects");
+		await expect(page.locator(".page-header__title")).toHaveText("项目");
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"3 projects",
+			"8 个项目",
 		);
 
-		const shirone = page.locator('[data-project="shirone"]');
-		await expect(shirone.locator("h2")).toHaveText("Shirone");
-		await expect(shirone.locator(".project-card__cover img")).toHaveAttribute(
+		const projectOrder = await page
+			.locator(".project-card")
+			.evaluateAll((cards) =>
+				cards.map((card) => card.getAttribute("data-project")),
+			);
+		expect(projectOrder).toEqual(PROJECT_KEYS);
+
+		const gantry = page.locator('[data-project="gantry"]');
+		await expect(gantry.locator("h2")).toHaveText("Gantry");
+		await expect(gantry.locator(".project-card__cover img")).toHaveAttribute(
 			"src",
-			"/assets/projects/shirone.webp",
+			"/assets/projects/gantry.webp",
 		);
-		await expect(shirone).toHaveClass(/project-card--featured/);
-		await expect(shirone.locator('[data-phase="building"]')).toHaveText(
-			"Building",
+		await expect(gantry).toHaveClass(/project-card--featured/);
+		await expect(gantry.locator('[data-phase="building"]')).toHaveText(
+			"构建中",
 		);
-		await expect(shirone.locator(".project-card__technologies li")).toHaveCount(
-			4,
+		await expect(gantry.locator(".project-card__technologies li")).toHaveCount(
+			6,
 		);
 		await expect(
-			shirone.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/LyraVoid/Shirone");
+			gantry.getByRole("link", { name: "查看源码" }),
+		).toHaveAttribute("href", "https://github.com/helantianshen/gantry");
 
-		// 无封面项目：渲染图标瓷砖形态（不渲染封面区）
-		const folkpatch = page.locator('[data-project="folkpatch"]');
-		await expect(folkpatch.locator(".project-card__icon")).toBeVisible();
-		await expect(folkpatch.locator(".project-card__cover")).toHaveCount(0);
-		await expect(folkpatch.locator('[data-phase="building"]')).toHaveText(
-			"Building",
+		const ossSync = page.locator('[data-project="oss-sync"]');
+		await expect(ossSync.locator('[data-phase="shipped"]')).toHaveText(
+			"已发布",
 		);
-		await expect(
-			folkpatch.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/LyraVoid/FolkPatch");
 
-		const kernelpatch = page.locator('[data-project="kernelpatch"]');
-		await expect(kernelpatch.locator(".project-card__icon")).toBeVisible();
-		await expect(kernelpatch.locator(".project-card__cover")).toHaveCount(0);
-		await expect(kernelpatch.locator('[data-phase="shipped"]')).toHaveText(
-			"Shipped",
+		const cmp = page.locator('[data-project="cmp"]');
+		await expect(cmp.locator(".project-card__icon")).toBeVisible();
+		await expect(cmp.locator('[data-phase="building"]')).toHaveText("构建中");
+		await expect(cmp.getByRole("link", { name: "查看源码" })).toHaveAttribute(
+			"href",
+			"https://github.com/mcpplibs/cmp",
+		);
+
+		const jianjia = page.locator('[data-project="jianjia-nexus-website"]');
+		await expect(jianjia.locator(".project-card__cover img")).toHaveAttribute(
+			"src",
+			"/assets/projects/jianjia-nexus-website.webp",
+		);
+		await expect(jianjia.locator('[data-phase="shipped"]')).toHaveText(
+			"已发布",
 		);
 		await expect(
-			kernelpatch.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/lyravoid/KernelPatch");
+			jianjia.getByRole("link", { name: "查看源码" }),
+		).toHaveAttribute(
+			"href",
+			"https://github.com/helantianshen/JianJiaNexus-OfficialWebsite-Frontend",
+		);
+
+		const fishBreedingManager = page.locator(
+			'[data-project="fish-breeding-manager"]',
+		);
+		await expect(
+			fishBreedingManager.locator(".project-card__cover img"),
+		).toHaveAttribute("src", "/assets/projects/fish-breeding-manager.webp");
+	});
+
+	test("无封面项目卡片都渲染可见图标", async ({ page }) => {
+		await expect(page.locator(".project-card__icon svg")).toHaveCount(
+			PROJECT_COUNT - 3,
+		);
 	});
 
 	test("直接加载时导航高亮与侧栏页面过滤正确", async ({ page }) => {
@@ -70,33 +107,31 @@ test.describe("项目页", () => {
 	test("分类筛选会同步项目数量与可见卡片（含 LoadingIndicator 过渡）", async ({
 		page,
 	}) => {
-		await page.getByRole("button", { name: "Android", exact: true }).click();
-		// 三段过渡的指示器阶段（contained LoadingIndicator 出现在内容区）
+		await page.getByRole("button", { name: "C++ 生态", exact: true }).click();
 		await expect(
 			page.locator(".projects-section__loading .m3-loading--contained"),
 		).toBeVisible();
 		await expect(page.locator(".project-card")).toHaveCount(2);
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"2 projects",
+			"2 个项目",
 		);
-		await expect(page.locator('[data-project="shirone"]')).toHaveCount(0);
-		await expect(page.locator('[data-project="folkpatch"]')).toBeVisible();
-		await expect(page.locator('[data-project="kernelpatch"]')).toBeVisible();
+		await expect(page.locator('[data-project="gantry"]')).toHaveCount(0);
+		await expect(page.locator('[data-project="cmp"]')).toBeVisible();
+		await expect(page.locator('[data-project="mcpp"]')).toBeVisible();
 		await expect(page.locator(".projects-section__loading")).toHaveCount(0);
 
-		await page.getByRole("button", { name: "Android", exact: true }).click();
+		await page.getByRole("button", { name: "C++ 生态", exact: true }).click();
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
 	});
 
 	test("实时搜索过滤与清除（URL ?q= 同步）", async ({ page }) => {
 		const searchInput = page.locator(".projects-section__search input");
 		await expect(searchInput).toBeVisible();
-		await searchInput.fill("Shirone");
+		await searchInput.fill("Gantry");
 		await expect(page.locator(".project-card")).toHaveCount(1);
-		await expect(page.locator('[data-project="shirone"]')).toBeVisible();
-		await expect(page).toHaveURL(/[?&]q=Shirone/);
+		await expect(page.locator('[data-project="gantry"]')).toBeVisible();
+		await expect(page).toHaveURL(/[?&]q=Gantry/);
 
-		// 清除搜索恢复全部
 		const clearBtn = page.locator(".projects-section__search-clear");
 		await clearBtn.click();
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
@@ -184,7 +219,7 @@ test.describe("项目页", () => {
 		await page.setViewportSize({ width: 1280, height: 900 });
 		const cards = page.locator(".project-card--without-cover");
 
-		await expect(cards).toHaveCount(PROJECT_COUNT - 1);
+		await expect(cards).toHaveCount(PROJECT_COUNT - 3);
 
 		const rowsMerged = await cards.evaluateAll((elements) =>
 			elements.every((element) => {
@@ -198,7 +233,6 @@ test.describe("项目页", () => {
 				if (!technologies || !actions) return false;
 				const techBox = technologies.getBoundingClientRect();
 				const actionsBox = actions.getBoundingClientRect();
-				// 同一行：两个区域的垂直范围必须重叠
 				return (
 					techBox.top < actionsBox.bottom && actionsBox.top < techBox.bottom
 				);
@@ -214,7 +248,7 @@ test.describe("项目页 Swup 导航", () => {
 
 	test("从持久顶栏进入后同步页面、导航与侧栏状态", async ({ page }) => {
 		await page.goto("/skills/", { waitUntil: "domcontentloaded" });
-		await page.getByRole("button", { name: "More", exact: true }).click();
+		await page.getByRole("button", { name: "更多", exact: true }).click();
 		await page.locator('a[data-nav-key="projects"]').click();
 
 		await expect(page).toHaveURL(/\/projects\/$/);

@@ -15,14 +15,34 @@ export const projectsConfig: ProjectsConfig = withUserConfig("projects", {
 	enable: true,
 	categories: [
 		{
-			key: "theme",
-			label: "Theme",
-			icon: "material-symbols:palette-outline-rounded",
+			key: "devops",
+			label: "发布运维",
+			icon: "material-symbols:deployed-code-outline-rounded",
 		},
 		{
-			key: "android",
-			label: "Android",
-			icon: "material-symbols:android-rounded",
+			key: "productivity",
+			label: "知识工具",
+			icon: "material-symbols:sync-rounded",
+		},
+		{
+			key: "cpp",
+			label: "C++ 生态",
+			icon: "material-symbols:memory-rounded",
+		},
+		{
+			key: "game",
+			label: "游戏模组",
+			icon: "material-symbols:sports-esports-rounded",
+		},
+		{
+			key: "frontend",
+			label: "前端体验",
+			icon: "material-symbols:web-rounded",
+		},
+		{
+			key: "backend",
+			label: "后端系统",
+			icon: "material-symbols:hub-rounded",
 		},
 	],
 	// disabledKeys: [],

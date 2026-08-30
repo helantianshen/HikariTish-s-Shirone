@@ -10,7 +10,7 @@ test.describe("top app bar content alignment", () => {
 		const title = content.locator(":scope > a");
 		const nav = content.locator(":scope > nav");
 
-		await expect(title).toHaveText("Shirone");
+		await expect(title).toHaveText("HikariTish");
 		await expect(title).not.toHaveClass(/lg:absolute/);
 		await expect(nav).toBeVisible();
 		await expect(nav).toHaveClass(/lg:absolute/);

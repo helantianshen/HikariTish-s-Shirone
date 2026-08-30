@@ -345,7 +345,20 @@ test.describe("banner wallpaper", () => {
 
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
-		await expect(page.locator("#banner-wrapper h1")).toHaveText("Shirone");
+		await expect(page.locator("#banner-wrapper h1")).toHaveText("HikariTish");
+		await expect(page).toHaveTitle("HikariTish's Blog");
+		const bannerSources = await page
+			.locator("#banner-wrapper")
+			.evaluate((stage) => ({
+				desktop: (stage as HTMLElement).dataset.desktopImages ?? "",
+				mobile: (stage as HTMLElement).dataset.mobileImages ?? "",
+			}));
+		expect(decodeURIComponent(bannerSources.desktop)).toContain(
+			"/banner/desktop/shirone-cover.webp",
+		);
+		expect(decodeURIComponent(bannerSources.mobile)).toContain(
+			"/banner/mobile/shirone-cover.webp",
+		);
 		await expectSubtitleTyping(page);
 		await expect(page.locator("#navbar")).toHaveClass(
 			/top-app-bar--transparent/,

@@ -8,11 +8,10 @@ import { expect, test } from "@playwright/test";
  * 布局形态跟随全局文章列表偏好（localStorage `post-list-mode`，DisplaySettings
  * 切换广播 post-list-layout-change 事件）：grid 海报网格 / list 横向卡。
  * 数据来自 src/data/anime.ts（经 utils/anime-data.getAnimeList 稳定顺序），
- * 断言基于 Mizuki 迁移数据集（5 条：watching×3/completed/planned，带真实封面与
- * Bilibili 外链）；站点默认语言为 en（siteConfig.lang），文案断言用英文。
+ * 断言基于当前本地收藏数据集（19 条，封面全部本地化）；站点语言为 zh_CN。
  */
 
-const ANIME_COUNT = 5;
+const INITIAL_VISIBLE_COUNT = 12;
 
 test.describe("番剧页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -21,7 +20,9 @@ test.describe("番剧页", () => {
 			localStorage.setItem("post-list-mode", "grid"),
 		);
 		await page.goto("/anime/");
-		await expect(page.locator(".anime-card")).toHaveCount(ANIME_COUNT);
+		await expect(page.locator(".anime-card")).toHaveCount(
+			INITIAL_VISIBLE_COUNT,
+		);
 	});
 
 	test("渲染番剧卡片（状态 pill / 评分 / 真实封面 / 进度条）", async ({
@@ -29,11 +30,9 @@ test.describe("番剧页", () => {
 	}) => {
 		const first = page.locator(".anime-card").first();
 		await expect(first).toHaveAttribute("data-status", "completed");
-		await expect(first.locator(".anime-card__title")).toHaveText(
-			"Lycoris Recoil",
-		);
+		await expect(first.locator(".anime-card__title")).toHaveText("莉可丽丝");
 		// 状态 tonal pill（i18n 文案 + 语义色注入）
-		await expect(first.locator(".anime-card__status")).toHaveText("Completed");
+		await expect(first.locator(".anime-card__status")).toHaveText("看完");
 		await expect(first.locator(".anime-card__status")).toHaveCSS(
 			"color",
 			/rgb\(|var\(--tertiary\)/,
@@ -45,7 +44,7 @@ test.describe("番剧页", () => {
 		await expect(first.locator("a.anime-card__cover")).toHaveCount(1);
 		await expect(first.locator("a.anime-card__cover")).toHaveAttribute(
 			"href",
-			/https:\/\/(www\.bilibili\.com\/bangumi\/media\/md28338623|bgm\.tv\/subject\/364450)/,
+			/https:\/\/bgm\.tv\/subject\/364450/,
 		);
 		await expect(first.locator(".anime-card__play")).toHaveCount(1);
 		// completed 卡不渲染进度条；watching 卡渲染 determinate 进度 + watched/total
@@ -54,18 +53,18 @@ test.describe("番剧页", () => {
 			.locator('.anime-card[data-status="watching"]')
 			.first();
 		await expect(watching.locator(".anime-card__title")).toHaveText(
-			/The Secret of the Magic Girl|Yowamushi Pedal/,
+			"间谍过家家 第二季",
 		);
 		await expect(watching.locator(".m3-progress--linear")).toHaveCount(1);
 		await expect(watching.locator(".anime-card__progress-text")).toHaveText(
-			"8/12",
+			"4/12",
 		);
 		// 元信息行与题材弱标签
 		await expect(first.locator(".anime-card__meta")).toHaveText(
 			"2022 · A-1 Pictures",
 		);
 		await expect(first.locator(".anime-card__genre").first()).toHaveText(
-			"#Action",
+			"#动作",
 		);
 	});
 
@@ -73,29 +72,31 @@ test.describe("番剧页", () => {
 		page,
 	}) => {
 		await expect(page.locator(".page-header")).toHaveCount(1);
-		await expect(page.locator(".page-header__title")).toHaveText("Anime");
+		await expect(page.locator(".page-header__title")).toHaveText("番剧");
 		await expect(page.locator(".page-header__icon svg")).toHaveCount(1);
 		// 官方 Chips 原子（filter 形态 + 状态前置图标），只列数据中出现的状态
 		const chips = page.locator(".anime-section__chips .m3-chip--filter");
 		await expect(chips).toHaveCount(3);
-		await expect(page.locator(".anime-section__count")).toHaveText("5 anime");
+		await expect(page.locator(".anime-section__count")).toHaveText("15 部番剧");
 	});
 
 	test("单选状态筛选（再点取消恢复全部，aria-pressed 同步 + URL ?status=）", async ({
 		page,
 	}) => {
 		const watchingChip = page.getByRole("button", {
-			name: "Watching",
+			name: "在看",
 			exact: true,
 		});
 		await watchingChip.click();
 		await expect(watchingChip).toHaveAttribute("aria-pressed", "true");
 		await expect(page).toHaveURL(/[?&]status=watching/);
-		await expect(page.locator(".anime-card")).toHaveCount(3);
-		await expect(page.locator(".anime-section__count")).toHaveText("3 anime");
+		await expect(page.locator(".anime-card")).toHaveCount(4);
+		await expect(page.locator(".anime-section__count")).toHaveText("4 部番剧");
 		await watchingChip.click();
 		await expect(watchingChip).toHaveAttribute("aria-pressed", "false");
-		await expect(page.locator(".anime-card")).toHaveCount(ANIME_COUNT);
+		await expect(page.locator(".anime-card")).toHaveCount(
+			INITIAL_VISIBLE_COUNT,
+		);
 		// 取消筛选后 URL 参数移除
 		await expect(page).not.toHaveURL(/status=/);
 	});
@@ -103,33 +104,37 @@ test.describe("番剧页", () => {
 	test("深链恢复筛选（?status=completed）与空态", async ({ page }) => {
 		await page.goto("/anime/?status=completed");
 		const completedChip = page.getByRole("button", {
-			name: "Completed",
+			name: "看完",
 			exact: true,
 		});
 		await expect(completedChip).toHaveAttribute("aria-pressed", "true");
-		await expect(page.locator(".anime-card")).toHaveCount(1);
-		await expect(page.locator(".anime-card__title")).toHaveText(
-			"Lycoris Recoil",
+		await expect(page.locator(".anime-card")).toHaveCount(6);
+		await expect(page.locator(".anime-card__title").first()).toHaveText(
+			"莉可丽丝",
 		);
 		// 未知状态值 → 空态文案
 		await page.goto("/anime/?status=nonsense");
 		await expect(page.locator(".anime-section__empty")).toBeVisible();
 		await expect(page.locator(".anime-section__empty")).toContainText(
-			"No anime matched your filter",
+			"没有符合条件的番剧",
 		);
 	});
 
 	test("状态筛选切换播放 LoadingIndicator 过渡后揭幕", async ({ page }) => {
-		await page.getByRole("button", { name: "Planned", exact: true }).click();
+		await page.getByRole("button", { name: "想看", exact: true }).click();
 		// 三段过渡的指示器阶段（contained LoadingIndicator 出现在内容区）
 		await expect(
 			page.locator(".anime-section__loading .m3-loading--contained"),
 		).toBeVisible();
-		// 过渡收敛后只剩 planned 一张卡
-		await expect(page.locator(".anime-card")).toHaveCount(1);
-		await expect(page.locator(".anime-card__title")).toHaveText(
-			"Is the Order a Rabbit?",
-		);
+		// 过渡收敛后展示 planned 收藏
+		await expect(page.locator(".anime-card")).toHaveCount(5);
+		await expect(page.locator(".anime-card__title")).toHaveText([
+			/关于邻家的天使大人/,
+			"总之就是非常可爱",
+			"前辈是男孩子",
+			"更衣人偶坠入爱河",
+			"Fate 系列",
+		]);
 		await expect(page.locator(".anime-section__loading")).toHaveCount(0);
 	});
 
@@ -147,17 +152,19 @@ test.describe("番剧页", () => {
 	test("实时搜索过滤与清除（URL ?q= 同步）", async ({ page }) => {
 		const searchInput = page.locator(".anime-section__search input");
 		await expect(searchInput).toBeVisible();
-		await searchInput.fill("Lycoris");
+		await searchInput.fill("莉可丽丝");
 		await expect(page.locator(".anime-card")).toHaveCount(1);
-		await expect(page.locator(".anime-card__title")).toHaveText(
-			"Lycoris Recoil",
+		await expect(page.locator(".anime-card__title")).toHaveText("莉可丽丝");
+		await expect(page).toHaveURL(
+			/[?&]q=(%E8%8E%89%E5%8F%AF%E4%B8%BD%E4%B8%9D|莉可丽丝)/,
 		);
-		await expect(page).toHaveURL(/[?&]q=Lycoris/);
 
 		// 清除搜索恢复全部
 		const clearBtn = page.locator(".anime-section__search-clear");
 		await clearBtn.click();
-		await expect(page.locator(".anime-card")).toHaveCount(ANIME_COUNT);
+		await expect(page.locator(".anime-card")).toHaveCount(
+			INITIAL_VISIBLE_COUNT,
+		);
 		await expect(page).not.toHaveURL(/q=/);
 	});
 
@@ -165,10 +172,10 @@ test.describe("番剧页", () => {
 		page,
 	}) => {
 		const listBtn = page.locator(
-			'.anime-section__layout-btn[aria-label="List"]',
+			'.anime-section__layout-btn[aria-label="列表"]',
 		);
 		const gridBtn = page.locator(
-			'.anime-section__layout-btn[aria-label="Grid"]',
+			'.anime-section__layout-btn[aria-label="网格"]',
 		);
 
 		// 默认 grid 海报网格
@@ -204,7 +211,9 @@ test.describe("番剧页布局形态（独立偏好）", () => {
 			localStorage.setItem("shirone:anime-layout-mode", "list"),
 		);
 		await page.goto("/anime/");
-		await expect(page.locator(".anime-card")).toHaveCount(ANIME_COUNT);
+		await expect(page.locator(".anime-card")).toHaveCount(
+			INITIAL_VISIBLE_COUNT,
+		);
 		await expect(page.locator(".anime-list")).toHaveClass(/anime-list--list/);
 		const first = page.locator(".anime-card").first();
 		await expect(first).toHaveCSS("flex-direction", "row");
@@ -222,7 +231,9 @@ test.describe("番剧页布局形态（独立偏好）", () => {
 
 	test("默认布局为 grid 海报网格", async ({ page }) => {
 		await page.goto("/anime/");
-		await expect(page.locator(".anime-card")).toHaveCount(ANIME_COUNT);
+		await expect(page.locator(".anime-card")).toHaveCount(
+			INITIAL_VISIBLE_COUNT,
+		);
 		await expect(page.locator(".anime-list")).toHaveClass(/anime-list--grid/);
 	});
 });

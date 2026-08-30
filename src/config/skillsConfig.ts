@@ -15,19 +15,24 @@ export const skillsConfig: SkillsConfig = withUserConfig("skills", {
 	enable: true,
 	categories: [
 		{
-			key: "frontend",
-			label: "Frontend",
+			key: "languages",
+			label: "编程语言",
+			icon: "material-symbols:code-blocks-rounded",
+		},
+		{
+			key: "frontend-runtime",
+			label: "前端与运行时",
 			icon: "material-symbols:web-rounded",
 		},
 		{
-			key: "backend",
-			label: "Backend",
-			icon: "material-symbols:dns-rounded",
+			key: "data-middleware",
+			label: "数据与中间件",
+			icon: "material-symbols:database-rounded",
 		},
 		{
-			key: "tooling",
-			label: "Tooling",
-			icon: "material-symbols:construction-rounded",
+			key: "cloud-ops",
+			label: "云原生与运维",
+			icon: "material-symbols:cloud-sync-rounded",
 		},
 	],
 	// disabledNames: [],

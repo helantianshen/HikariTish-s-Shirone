@@ -1,4 +1,6 @@
+import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
+import sharp from "sharp";
 import { resolveAnimeOptions } from "../../src/config/animeConfig.ts";
 import { animeData } from "../../src/data/anime.ts";
 import {
@@ -11,6 +13,44 @@ import {
 import { getAnimeList } from "../../src/utils/anime-data.ts";
 
 test.describe("Anime 数据源与配置解析契约", () => {
+	test("本地收藏包含用户番剧清单并使用统一本地封面", async () => {
+		const expected = [
+			["间谍过家家 第一季", "completed", 25, 25],
+			["间谍过家家 第二季", "watching", 4, 12],
+			["茉莉花酱的好感度正在崩坏", "watching", 7, 8],
+			["Re：从零开始的异世界生活 第一季", "completed", 25, 25],
+			["Re：从零开始的异世界生活 第二季", "completed", 25, 25],
+			["Re：从零开始的异世界生活 第三季", "completed", 16, 16],
+			["Re：从零开始的异世界生活 第四季", "watching", 14, 14],
+			["约会大作战", "watching", 9, 13],
+			["关于邻家的天使大人不知不觉把我惯成了废人", "planned", 0, 12],
+			["总之就是非常可爱", "planned", 0, 12],
+			["前辈是男孩子", "planned", 0, 12],
+			["莉可丽丝", "completed", 13, 13],
+			["紫罗兰永恒花园", "completed", 13, 13],
+			["更衣人偶坠入爱河", "planned", 0, 12],
+			["Fate 系列", "planned", 0, 26],
+		] as const;
+
+		expect(animeData).toHaveLength(15);
+		expect(animeData.at(-1)?.title).toBe("Fate 系列");
+		for (const [title, status, watched, total] of expected) {
+			const item = animeData.find((anime) => anime.title === title);
+			expect(item, `${title} should exist`).toBeDefined();
+			expect(item?.status).toBe(status);
+			expect(item?.progress).toEqual({ watched, total });
+			expect(item?.cover).toMatch(/^\/assets\/anime\/covers\/.+\.webp$/);
+			expect(item?.link).toMatch(/^https:\/\/bgm\.tv\/subject\/\d+$/);
+
+			const metadata = await sharp(
+				resolve(process.cwd(), "public", item?.cover?.slice(1) ?? ""),
+			).metadata();
+			expect(metadata.format).toBe("webp");
+			expect(metadata.width).toBe(600);
+			expect(metadata.height).toBe(900);
+		}
+	});
+
 	test("resolveAnimeOptions: 默认本地模式与配置安全解析", () => {
 		const defaultResolved = resolveAnimeOptions({
 			enable: true,
@@ -218,7 +258,7 @@ test.describe("Anime 数据源与配置解析契约", () => {
 			},
 		});
 		expect(localList.length).toBe(animeData.length);
-		expect(localList[0].title).toBe("Lycoris Recoil");
+		expect(localList[0].title).toBe("莉可丽丝");
 
 		// 当前快照模式
 		const list = await getAnimeList();
