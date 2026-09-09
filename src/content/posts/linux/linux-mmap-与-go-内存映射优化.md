@@ -1,7 +1,7 @@
 ---
 title: Linux mmap 与 Go 内存映射优化
 published: 2026-05-16
-description: 关于「Linux mmap 与 Go 内存映射优化」的技术笔记。
+description: 比较传统 read 与 mmap 的数据路径，解释缺页加载和页面淘汰，并展示 Go 中的内存映射实践。
 tags:
   - linux
   - go

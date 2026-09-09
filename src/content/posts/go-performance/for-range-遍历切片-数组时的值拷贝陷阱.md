@@ -1,7 +1,7 @@
 ---
 title: for...range 遍历切片/数组时的值拷贝陷阱
 published: 2026-05-16
-description: 关于「for...range 遍历切片/数组时的值拷贝陷阱」的技术笔记。
+description: 解释 for range 的值拷贝语义，以及修改副本、获取循环变量地址和遍历大结构体时的常见问题。
 tags:
   - go
   - 性能优化

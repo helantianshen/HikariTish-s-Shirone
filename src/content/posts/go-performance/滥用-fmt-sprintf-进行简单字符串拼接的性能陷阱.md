@@ -1,7 +1,7 @@
 ---
 title: 滥用 fmt.Sprintf 进行简单字符串拼接的性能陷阱
 published: 2026-05-16
-description: 关于「滥用 fmt.Sprintf 进行简单字符串拼接的性能陷阱」的技术笔记。
+description: 分析 fmt.Sprintf 在简单拼接中的接口装箱、格式解析和堆逃逸开销，并比较更轻量的替代方案。
 tags:
   - go
   - 性能优化

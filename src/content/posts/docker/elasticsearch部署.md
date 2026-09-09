@@ -1,7 +1,7 @@
 ---
 title: ElasticSearch部署
 published: 2026-05-13
-description: 关于「ElasticSearch部署」的技术笔记。
+description: 记录 Elasticsearch 8.17 与 IK 分词器的分步容器部署方案，涵盖国内镜像、插件安装和启动验证。
 tags:
   - docker
   - elasticsearch

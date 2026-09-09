@@ -1,7 +1,7 @@
 ---
 title: Gin项目集成
 published: 2026-07-30
-description: 关于「Gin项目集成」的技术笔记。
+description: 展示 GORM 与 Gin 的分层集成方式，包括数据库注入、Service 事务、请求上下文和测试策略。
 tags:
   - gorm
   - gin

@@ -1,7 +1,7 @@
 ---
 title: Linux sendfile 与 Go 零拷贝优化
 published: 2026-05-16
-description: 关于「Linux sendfile 与 Go 零拷贝优化」的技术笔记。
+description: 分析传统文件发送与 sendfile 的拷贝路径，并说明 Go 的 io.Copy 如何触发零拷贝优化。
 tags:
   - linux
   - go

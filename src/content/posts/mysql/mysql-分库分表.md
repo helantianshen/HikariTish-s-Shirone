@@ -1,7 +1,7 @@
 ---
 title: MySQL 分库分表
 published: 2026-05-29
-description: 关于「MySQL 分库分表」的技术笔记。
+description: 比较垂直与水平拆分策略，说明分片键、全局 ID、跨库查询和数据迁移带来的工程问题。
 tags:
   - mysql
   - 分布式

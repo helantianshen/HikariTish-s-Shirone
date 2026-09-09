@@ -1,7 +1,7 @@
 ---
 title: Go Context 底层原理
 published: 2026-07-20
-description: 关于「Go Context 底层原理」的技术笔记。
+description: 解析 Context 的树形派生结构、取消传播、超时控制和值查找机制，并说明工程中的使用边界。
 tags:
   - go
   - 并发

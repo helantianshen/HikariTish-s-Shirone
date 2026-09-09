@@ -1,7 +1,7 @@
 ---
 title: MySQL Using filesort 调优
 published: 2026-05-27
-description: 关于「MySQL Using filesort 调优」的技术笔记。
+description: 澄清 Using filesort 的真实含义，比较内存与磁盘排序路径，并整理 ORDER BY 的索引优化方法。
 tags:
   - mysql
   - SQL 优化

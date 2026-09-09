@@ -1,7 +1,7 @@
 ---
 title: Go Channel 底层原理
 published: 2026-05-22
-description: 关于「Go Channel 底层原理」的技术笔记。
+description: 从 CSP 模型出发，解析无缓冲、有缓冲和 nil Channel 的结构、阻塞行为与调度协作机制。
 tags:
   - go
   - 并发

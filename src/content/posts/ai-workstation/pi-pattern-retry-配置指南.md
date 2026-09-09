@@ -1,7 +1,7 @@
 ---
 title: pi-pattern-retry-配置指南
 published: 2026-07-21
-description: 关于「pi-pattern-retry-配置指南」的技术笔记。
+description: 说明 pi-pattern-retry 的安装、事件匹配与重试计划配置，用于在服务异常后自动继续会话。
 tags:
   - AI 工具
   - 工程实践

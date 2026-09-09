@@ -1,7 +1,7 @@
 ---
 title: MySQL 索引底层与优化
 published: 2026-05-24
-description: 关于「MySQL 索引底层与优化」的技术笔记。
+description: 解释 InnoDB 选择 B+ 树的原因、页结构和聚簇索引，并总结联合索引与查询优化原则。
 tags:
   - mysql
   - SQL 优化

@@ -1,7 +1,7 @@
 ---
 title: Go GMP 调度算法
 published: 2026-05-09
-description: 关于「Go GMP 调度算法」的技术笔记。
+description: 解释 Goroutine、线程与逻辑处理器的协作关系，以及本地队列、工作窃取和抢占调度机制。
 tags:
   - go
   - 并发

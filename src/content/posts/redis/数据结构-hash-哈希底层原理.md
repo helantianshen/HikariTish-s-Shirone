@@ -1,7 +1,7 @@
 ---
 title: 数据结构：Hash 哈希底层原理
 published: 2026-07-18
-description: 关于「数据结构：Hash 哈希底层原理」的技术笔记。
+description: 解析 Redis Hash 在 Listpack 与哈希表之间的编码切换，以及内存占用和查询效率的权衡。
 tags:
   - redis
   - 数据结构

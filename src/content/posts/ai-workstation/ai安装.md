@@ -1,7 +1,7 @@
 ---
 title: AI安装
 published: 2026-07-23
-description: 关于「AI安装」的技术笔记。
+description: 汇总 Pi Agent 与 Oh My Pi 在 Windows、Linux 上的安装、配置文件和扩展管理流程。
 tags:
   - AI 工具
   - 开发环境

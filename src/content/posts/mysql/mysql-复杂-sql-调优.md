@@ -1,7 +1,7 @@
 ---
 title: MySQL 复杂 SQL 调优
 published: 2026-05-27
-description: 关于「MySQL 复杂 SQL 调优」的技术笔记。
+description: 针对深度分页、JOIN 和复杂查询分析执行代价，并给出延迟关联、游标分页等优化方案。
 tags:
   - mysql
   - SQL 优化

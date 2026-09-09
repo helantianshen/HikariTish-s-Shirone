@@ -1,7 +1,7 @@
 ---
 title: Docker常用命令
 published: 2026-05-12
-description: 关于「Docker常用命令」的技术笔记。
+description: 以 RabbitMQ、Redis 和 MySQL 为例，拆解 docker run、docker exec 及容器重启等常用参数。
 tags:
   - docker
   - 运维

@@ -1,7 +1,7 @@
 ---
 title: 数据结构：List 列表底层原理
 published: 2026-07-18
-description: 关于「数据结构：List 列表底层原理」的技术笔记。
+description: 回顾 Redis List 从双向链表、Ziplist 到 Quicklist 的演进，并解释节点压缩与性能取舍。
 tags:
   - redis
   - 数据结构

@@ -1,7 +1,7 @@
 ---
 title: Go GC 调优实践
 published: 2026-06-04
-description: 关于「Go GC 调优实践」的技术笔记。
+description: 围绕 GOGC、GOMEMLIMIT、内存分配和运行时指标，整理 Go 服务的 GC 观测与调优方法。
 tags:
   - go
   - 内存管理

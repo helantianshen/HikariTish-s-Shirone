@@ -1,7 +1,7 @@
 ---
 title: Go GC 三色标记法与混合写屏障
 published: 2026-06-04
-description: 关于「Go GC 三色标记法与混合写屏障」的技术笔记。
+description: 拆解三色标记流程、并发标记的不变式和混合写屏障，说明 Go GC 如何避免漏标存活对象。
 tags:
   - go
   - 内存管理

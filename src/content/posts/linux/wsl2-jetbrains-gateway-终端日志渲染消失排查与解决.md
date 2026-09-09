@@ -1,7 +1,7 @@
 ---
 title: WSL2 JetBrains Gateway 终端日志渲染消失排查与解决
 published: 2026-07-27
-description: 关于「WSL2 JetBrains Gateway 终端日志渲染消失排查与解决」的技术笔记。
+description: 记录 WSL2 直连 JetBrains Gateway 时运行日志消失的诊断过程、根因定位与配置修复。
 tags:
   - linux
   - 开发环境

@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
+import { pathToFileURL } from "node:url";
 import YAML from "yaml";
 
 const projectRoot = path.resolve(import.meta.dirname, "../..");
 const postsRoot = path.join(projectRoot, "src/content/posts");
+const importUtilsUrl = pathToFileURL(
+	path.join(projectRoot, "scripts/content/import-utils.mjs"),
+).href;
 
 const expectedCategories = new Map([
 	["Docker", 2],
@@ -64,6 +68,79 @@ function parsePost(source) {
 }
 
 describe("Obsidian 笔记导入结果", () => {
+	it("优先使用源笔记摘要并为缺省值提供安全回退", async () => {
+		let resolvePostDescription;
+		try {
+			({ resolvePostDescription } = await import(importUtilsUrl));
+		} catch (error) {
+			assert.fail(`缺少导入摘要解析器: ${error.message}`);
+		}
+
+		assert.equal(
+			resolvePostDescription(
+				{ description: "  记录 GoLand 内存与索引参数的调优方法。  " },
+				"GoLand 调优",
+				"项目内整理的回退摘要。",
+			),
+			"记录 GoLand 内存与索引参数的调优方法。",
+		);
+		assert.equal(
+			resolvePostDescription({}, "GoLand 调优", "项目内整理的回退摘要。"),
+			"项目内整理的回退摘要。",
+		);
+		assert.equal(
+			resolvePostDescription({}, "GoLand 调优"),
+			"关于「GoLand 调优」的技术笔记。",
+		);
+		assert.equal(
+			resolvePostDescription({ description: "   " }, "GoLand 调优"),
+			"关于「GoLand 调优」的技术笔记。",
+		);
+	});
+
+	it("源笔记摘要中的凭据形态内容会被脱敏", async () => {
+		let resolvePostDescription;
+		try {
+			({ resolvePostDescription } = await import(importUtilsUrl));
+		} catch (error) {
+			assert.fail(`缺少导入摘要解析器: ${error.message}`);
+		}
+
+		const description = resolvePostDescription(
+			{ description: "调试示例 api_key='abcdefghijklmnop'" },
+			"凭据示例",
+		);
+		assert.equal(description, "调试示例 api_key='REDACTED_SECRET'");
+	});
+
+	it("每篇文章使用切合内容的独立摘要", async () => {
+		const files = await collectMarkdownFiles(postsRoot);
+		const descriptionsByTitle = new Map();
+
+		for (const file of files) {
+			const { data } = parsePost(await readFile(file, "utf8"));
+			assert.equal(typeof data.description, "string");
+			assert.ok(data.description.length >= 18, `${data.title} 的摘要过短`);
+			assert.doesNotMatch(
+				data.description,
+				/^关于「.+」的技术笔记。$/,
+				`${data.title} 仍在使用统一摘要模板`,
+			);
+			descriptionsByTitle.set(data.title, data.description);
+		}
+
+		assert.equal(descriptionsByTitle.size, 56);
+		assert.equal(
+			new Set(descriptionsByTitle.values()).size,
+			56,
+			"每篇文章应有独立摘要",
+		);
+		assert.equal(
+			descriptionsByTitle.get("GoLand 调优"),
+			"整理 GoLand 的 JVM、代码缓存、GC 与 Go 工具进程参数，改善大型项目中的内存占用和响应速度。",
+		);
+	});
+
 	it("只包含排除资产平台管理和 Eino 后的 56 篇文章", async () => {
 		const files = await collectMarkdownFiles(postsRoot);
 		assert.equal(files.length, 56);

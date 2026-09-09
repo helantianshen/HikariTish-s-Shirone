@@ -1,7 +1,7 @@
 ---
 title: Linux 常用命令
 published: 2026-07-18
-description: 关于「Linux 常用命令」的技术笔记。
+description: 按目录、文件、文本、进程、网络和权限等场景整理 Linux 常用命令、参数与示例。
 tags:
   - linux
   - 运维

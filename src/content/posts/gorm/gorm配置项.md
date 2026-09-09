@@ -1,7 +1,7 @@
 ---
 title: GORM配置项
 published: 2026-07-30
-description: 关于「GORM配置项」的技术笔记。
+description: 梳理 gorm.Config、命名策略、日志和 Session 级选项，并说明 Debug、DryRun 与 ToSQL 的使用场景。
 tags:
   - gorm
   - 数据库

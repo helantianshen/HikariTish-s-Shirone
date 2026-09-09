@@ -1,7 +1,7 @@
 ---
 title: MySQL 表结构设计规范
 published: 2026-05-29
-description: 关于「MySQL 表结构设计规范」的技术笔记。
+description: 从 NULL 语义、时间类型、字段长度、索引和数据一致性出发，总结 MySQL 表结构设计取舍。
 tags:
   - mysql
   - 数据库

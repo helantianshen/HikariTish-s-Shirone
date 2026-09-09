@@ -1,7 +1,7 @@
 ---
 title: Go Slice 底层原理与扩容机制
 published: 2026-06-04
-description: 关于「Go Slice 底层原理与扩容机制」的技术笔记。
+description: 解析 Slice 的指针、长度和容量结构，比较初始化方式、共享底层数组及 append 扩容行为。
 tags:
   - go
   - 数据结构

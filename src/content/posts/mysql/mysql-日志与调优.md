@@ -1,7 +1,7 @@
 ---
 title: MySQL 日志与调优
 published: 2026-05-27
-description: 关于「MySQL 日志与调优」的技术笔记。
+description: 串联 Undo、Redo、Binlog 和慢查询日志的作用，说明事务恢复、复制与性能排查的关键路径。
 tags:
   - mysql
   - 日志

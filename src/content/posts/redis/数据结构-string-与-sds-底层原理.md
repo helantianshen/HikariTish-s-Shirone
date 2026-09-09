@@ -1,7 +1,7 @@
 ---
 title: 数据结构：String 与 SDS 底层原理
 published: 2026-07-18
-description: 关于「数据结构：String 与 SDS 底层原理」的技术笔记。
+description: 介绍 SDS 的长度记录、空间预分配和惰性释放机制，并比较它与传统 C 字符串的安全性和效率。
 tags:
   - redis
   - 数据结构

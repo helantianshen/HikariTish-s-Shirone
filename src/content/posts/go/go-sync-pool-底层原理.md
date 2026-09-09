@@ -1,7 +1,7 @@
 ---
 title: Go sync.Pool 底层原理
 published: 2026-06-04
-description: 关于「Go sync.Pool 底层原理」的技术笔记。
+description: 介绍 sync.Pool 的 Per-P 本地池、private/shared 分级存储、工作窃取与 GC 清理机制。
 tags:
   - go
   - 并发

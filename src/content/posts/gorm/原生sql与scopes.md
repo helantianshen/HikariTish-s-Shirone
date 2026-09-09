@@ -1,7 +1,7 @@
 ---
 title: 原生SQL与Scopes
 published: 2026-07-30
-description: 关于「原生SQL与Scopes」的技术笔记。
+description: 介绍 Raw、Exec、命名参数和 SQL 表达式，并用 Scopes 封装可复用查询条件和 DryRun 检查。
 tags:
   - gorm
   - 数据库

@@ -1,7 +1,7 @@
 ---
 title: MySQL 主从架构与读写分离
 published: 2026-05-27
-description: 关于「MySQL 主从架构与读写分离」的技术笔记。
+description: 解析 Binlog 主从复制流程、延迟成因和读写路由，并比较写后读、缓存等一致性方案。
 tags:
   - mysql
   - 分布式

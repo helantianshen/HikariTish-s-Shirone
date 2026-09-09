@@ -1,7 +1,7 @@
 ---
 title: time.After 内存泄漏陷阱
 published: 2026-05-16
-description: 关于「time.After 内存泄漏陷阱」的技术笔记。
+description: 追踪高频 select 循环中 time.After 的定时器生命周期、内存压力与不同 Go 版本下的修复方式。
 tags:
   - go
   - 性能优化

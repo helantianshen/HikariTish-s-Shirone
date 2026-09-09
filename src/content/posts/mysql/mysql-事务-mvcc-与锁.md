@@ -1,7 +1,7 @@
 ---
 title: MySQL 事务、MVCC 与锁
 published: 2026-05-24
-description: 关于「MySQL 事务、MVCC 与锁」的技术笔记。
+description: 从 ACID 和隔离级别展开，解析 Undo/Redo、Read View、版本链以及行锁和间隙锁机制。
 tags:
   - mysql
   - 事务

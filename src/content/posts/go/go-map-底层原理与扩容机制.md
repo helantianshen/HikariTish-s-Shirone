@@ -1,7 +1,7 @@
 ---
 title: Go Map 底层原理与扩容机制
 published: 2026-06-04
-description: 关于「Go Map 底层原理与扩容机制」的技术笔记。
+description: 梳理 Go Map 的桶结构、哈希定位、读写操作和渐进式扩容过程，并说明并发使用限制。
 tags:
   - go
   - 数据结构

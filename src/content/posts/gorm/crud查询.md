@@ -1,7 +1,7 @@
 ---
 title: CRUD查询
 published: 2026-07-30
-description: 关于「CRUD查询」的技术笔记。
+description: 覆盖 GORM 创建、读取、更新和删除的两套 API，补充批量操作、安全边界与查询对象复用问题。
 tags:
   - gorm
   - 数据库

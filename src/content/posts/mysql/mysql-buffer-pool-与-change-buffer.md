@@ -1,7 +1,7 @@
 ---
 title: MySQL Buffer Pool 与 Change Buffer
 published: 2026-05-27
-description: 关于「MySQL Buffer Pool 与 Change Buffer」的技术笔记。
+description: 讲解 Buffer Pool 的页缓存与改进 LRU，以及 Change Buffer 如何降低非唯一索引的随机写入。
 tags:
   - mysql
   - 内存管理

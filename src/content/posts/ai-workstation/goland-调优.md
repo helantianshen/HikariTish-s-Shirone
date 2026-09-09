@@ -1,7 +1,7 @@
 ---
 title: GoLand 调优
 published: 2026-08-07
-description: 关于「GoLand 调优」的技术笔记。
+description: 整理 GoLand 的 JVM、代码缓存、GC 与 Go 工具进程参数，改善大型项目中的内存占用和响应速度。
 tags:
   - AI 工具
   - 开发环境

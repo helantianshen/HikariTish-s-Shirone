@@ -40,6 +40,7 @@
     "skills:package": "node scripts/package-skills.mjs",
     "check:markdown-manifest": "node scripts/check-markdown-manifest.mjs",
     "icons:generate": "node scripts/icons/generate-local-icons.mjs",
+    "compass:icons": "node scripts/compass/cache-site-icons.mjs --refresh",
     "images:generate": "node scripts/images/generate-moment-thumbnails.mjs",
     "anime:sync": "node scripts/anime/sync.mjs",
     "fonts:check": "node scripts/fonts/check-fonts.mjs",
