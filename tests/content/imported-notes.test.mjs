@@ -14,7 +14,7 @@ const importUtilsUrl = pathToFileURL(
 const expectedCategories = new Map([
 	["Docker", 2],
 	["Gin 框架", 11],
-	["Go", 8],
+	["Go", 9],
 	["Go语言性能陷阱", 3],
 	["Gorm", 13],
 	["Linux", 4],
@@ -129,21 +129,42 @@ describe("Obsidian 笔记导入结果", () => {
 			descriptionsByTitle.set(data.title, data.description);
 		}
 
-		assert.equal(descriptionsByTitle.size, 56);
+		assert.equal(descriptionsByTitle.size, 57);
 		assert.equal(
 			new Set(descriptionsByTitle.values()).size,
-			56,
+			57,
 			"每篇文章应有独立摘要",
 		);
 		assert.equal(
 			descriptionsByTitle.get("GoLand 调优"),
 			"整理 GoLand 的 JVM、代码缓存、GC 与 Go 工具进程参数，改善大型项目中的内存占用和响应速度。",
 		);
+		assert.equal(
+			descriptionsByTitle.get(
+				"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+			),
+			"用泛型、Channel 与 goroutine 封装 Future/Await 模型，解释异步任务启动、结果等待、错误处理和并发执行边界。",
+		);
+		const asyncAwaitPost = parsePost(
+			await readFile(
+				path.join(
+					postsRoot,
+					"go",
+					"从-channel-到-future-用-go-实现-async-await-模型.md",
+				),
+				"utf8",
+			),
+		);
+		assert.equal(
+			asyncAwaitPost.data.title,
+			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+		);
+		assert.doesNotMatch(asyncAwaitPost.body, /^#\s+从 Channel 到 Future/m);
 	});
 
-	it("只包含排除资产平台管理和 Eino 后的 56 篇文章", async () => {
+	it("只包含排除资产平台管理和 Eino 后的 57 篇文章", async () => {
 		const files = await collectMarkdownFiles(postsRoot);
-		assert.equal(files.length, 56);
+		assert.equal(files.length, 57);
 
 		const categoryCounts = new Map();
 		for (const file of files) {
@@ -212,6 +233,10 @@ describe("Obsidian 笔记导入结果", () => {
 			"主从模式",
 		]);
 		assert.deepEqual(tagsByTitle.get("Docker常用命令"), ["docker", "运维"]);
+		assert.deepEqual(
+			tagsByTitle.get("从 Channel 到 Future：用 Go 实现 Async/Await 模型"),
+			["go", "并发", "工程实践"],
+		);
 	});
 
 	it("Docker常用命令使用项目内的本地封面", async () => {

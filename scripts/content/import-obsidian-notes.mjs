@@ -39,7 +39,7 @@ const categoryDirectories = new Map([
 const expectedCategoryCounts = new Map([
 	["Docker", 2],
 	["Gin 框架", 11],
-	["Go", 8],
+	["Go", 9],
 	["Go语言性能陷阱", 3],
 	["Gorm", 13],
 	["Linux", 4],
@@ -80,6 +80,10 @@ const articleTopicTags = new Map([
 	["Go/Go Map 底层原理与扩容机制", ["数据结构", "底层原理"]],
 	["Go/Go Slice 底层原理与扩容机制", ["数据结构", "底层原理"]],
 	["Go/Go sync.Pool 底层原理", ["并发", "内存管理"]],
+	[
+		"Go/从 Channel 到 Future：用 Go 实现 Async-Await 模型",
+		["并发", "工程实践"],
+	],
 	[
 		"Go语言性能陷阱/for...range 遍历切片/数组时的值拷贝陷阱",
 		["性能优化", "数据结构"],
@@ -235,6 +239,10 @@ const curatedDescriptions = new Map([
 		"介绍 sync.Pool 的 Per-P 本地池、private/shared 分级存储、工作窃取与 GC 清理机制。",
 	],
 	[
+		"Go/从 Channel 到 Future：用 Go 实现 Async-Await 模型",
+		"用泛型、Channel 与 goroutine 封装 Future/Await 模型，解释异步任务启动、结果等待、错误处理和并发执行边界。",
+	],
+	[
 		"Gorm/错误处理与调试",
 		"比较 GORM Traditional 与 Generics API 的错误处理，并介绍错误翻译、日志、DryRun 和执行计划排查。",
 	],
@@ -352,6 +360,12 @@ const curatedDescriptions = new Map([
 	],
 ]);
 const postOverrides = new Map([
+	[
+		"Go/从 Channel 到 Future：用 Go 实现 Async-Await 模型",
+		{
+			title: "从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+		},
+	],
 	[
 		"Docker/Docker常用命令",
 		{
@@ -520,6 +534,12 @@ function buildPost(note, registry) {
 		`^#\\s+${note.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*(?:\\r?\\n)+`,
 	);
 	body = body.replace(duplicateHeading, "");
+	if (override.title) {
+		body = body.replace(
+			/^#\s+从 Channel 到 Future：用 Go 实现 Async\/Await 模型\s*(?:\r?\n)+/,
+			"",
+		);
+	}
 	body = convertObsidianLinks(body, registry);
 	body = normalizeFenceLanguages(body);
 	const sanitized = sanitizeSecrets(body);
@@ -531,7 +551,7 @@ function buildPost(note, registry) {
 }
 
 function assertInventory(notes) {
-	assert.equal(notes.length, 56, "导入清单必须恰好包含 56 篇笔记");
+	assert.equal(notes.length, 57, "导入清单必须恰好包含 57 篇笔记");
 	const actualCounts = new Map();
 	for (const note of notes) {
 		actualCounts.set(note.category, (actualCounts.get(note.category) ?? 0) + 1);

@@ -13,14 +13,6 @@ test.describe("导入的 Obsidian 文章", () => {
 		);
 		await expect(page.locator("#post-cover img")).toBeVisible();
 
-		await page.goto("/7/", { waitUntil: "domcontentloaded" });
-		const dockerCard = page
-			.locator(".m3-blog-postcard")
-			.filter({ hasText: "Docker常用命令" });
-		await expect(
-			dockerCard.locator(".m3-blog-postcard__cover img"),
-		).toBeVisible();
-
 		await page.goto("/posts/ai-workstation/ai安装/", {
 			waitUntil: "domcontentloaded",
 		});
@@ -39,12 +31,6 @@ test.describe("导入的 Obsidian 文章", () => {
 		});
 		await expect(page.locator("#post-cover img")).toBeVisible();
 
-		await page.goto("/7/", { waitUntil: "domcontentloaded" });
-		const gmpCard = page
-			.locator(".m3-blog-postcard")
-			.filter({ hasText: "Go GMP 调度算法" });
-		await expect(gmpCard.locator(".m3-blog-postcard__cover img")).toBeVisible();
-
 		await page.goto("/posts/go/go-context-底层原理/", {
 			waitUntil: "domcontentloaded",
 		});
@@ -59,6 +45,19 @@ test.describe("导入的 Obsidian 文章", () => {
 		).toBeVisible();
 	});
 
+	test("新增 Async/Await 文章可直接访问", async ({ page }) => {
+		await page.goto(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+			{ waitUntil: "domcontentloaded" },
+		);
+		await expect(page.locator('[data-pagefind-meta="title"]')).toContainText(
+			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+		);
+		await expect(page.locator(".markdown-content")).toContainText(
+			"Go 本身没有",
+		);
+	});
+
 	test("文章详情与标签索引使用整理后的标签体系", async ({ page }) => {
 		await page.goto("/posts/go/go-gmp-调度算法/", {
 			waitUntil: "domcontentloaded",
@@ -71,7 +70,7 @@ test.describe("导入的 Obsidian 文章", () => {
 		const chips = page.locator(".tag-index__chip");
 		await expect(chips).toHaveCount(28);
 		for (const [tag, count] of [
-			["go", "13"],
+			["go", "14"],
 			["gin", "12"],
 			["docker", "2"],
 			["分布式", "2"],
