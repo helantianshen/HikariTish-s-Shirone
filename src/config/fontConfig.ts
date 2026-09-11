@@ -50,27 +50,17 @@ export const fontConfig: FontConfig = withUserConfig("font", {
 	 */
 	fontFamilies: [
 		// ---------------------------------------------------------------------
-		// 1. 正文字体（现代几何圆润西文字体 Outfit，与 M3E 大圆角及悠哉圆体绝配）
+		// 1. 全站正文字体（Maple Mono NF CN，试用完整中文与 Nerd Font 字形）
 		// ---------------------------------------------------------------------
 		{
-			id: "outfit-body",
-			family: "Outfit",
+			id: "maple-mono-nf-cn-body",
+			family: "Maple Mono NF CN",
 			role: "body",
-			source: "fontsource",
+			source: "local",
 			variants: [
 				{
-					file: "@fontsource/outfit/400.css",
+					file: "src/assets/fonts/MapleMono-NF-CN-Regular.ttf",
 					weight: 400,
-					style: "normal",
-				},
-				{
-					file: "@fontsource/outfit/500.css",
-					weight: 500,
-					style: "normal",
-				},
-				{
-					file: "@fontsource/outfit/700.css",
-					weight: 700,
 					style: "normal",
 				},
 			],
@@ -80,17 +70,17 @@ export const fontConfig: FontConfig = withUserConfig("font", {
 		},
 
 		// ---------------------------------------------------------------------
-		// 2. 中文 / 日文 CJK 字体（悠哉圆体 Yozai Medium，全量简繁中日韩 100% 覆盖）
+		// 2. 中文 / 日文 CJK 字体（Maple Mono NF CN，完整简繁中日韩覆盖）
 		// ---------------------------------------------------------------------
 		{
-			id: "yozai-cjk",
-			family: "Yozai Medium",
+			id: "maple-mono-nf-cn-cjk",
+			family: "Maple Mono NF CN",
 			role: "cjk",
 			source: "local",
 			variants: [
 				{
-					file: "src/assets/fonts/Yozai-Medium.ttf",
-					weight: 500,
+					file: "src/assets/fonts/MapleMono-NF-CN-Regular.ttf",
+					weight: 400,
 					style: "normal",
 				},
 			],
@@ -100,23 +90,18 @@ export const fontConfig: FontConfig = withUserConfig("font", {
 		},
 
 		// ---------------------------------------------------------------------
-		// 3. 代码等宽字体（渲染代码块与终端文本，对应 CSS 变量 --font-mono）
+		// 3. 代码等宽字体（Maple Mono NF CN，渲染代码块与终端文本）
 		// ---------------------------------------------------------------------
 		{
-			id: "jetbrains-mono",
-			family: "JetBrains Mono",
+			id: "maple-mono-nf-cn-mono",
+			family: "Maple Mono NF CN",
 			role: "mono",
-			source: "fontsource",
+			source: "local",
 			variants: [
 				{
-					file: "@fontsource-variable/jetbrains-mono/index.css",
-					weight: "100 800",
+					file: "src/assets/fonts/MapleMono-NF-CN-Regular.ttf",
+					weight: 400,
 					style: "normal",
-				},
-				{
-					file: "@fontsource-variable/jetbrains-mono/wght-italic.css",
-					weight: "100 800",
-					style: "italic",
 				},
 			],
 			fallback: [
