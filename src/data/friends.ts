@@ -64,6 +64,30 @@ export const friendsData: FriendItem[] = [
 		siteurl: "https://tx1st.cn/",
 		tags: ["博客", "云原生", "运维"],
 	},
+	{
+		id: 7,
+		title: "午安大电牛",
+		imgurl: "/assets/friends/njfu-yangfan-top.ico",
+		desc: "嵌入式与电力电子软件工程师，主攻阳台光伏",
+		siteurl: "https://www.njfu-yangfan.top/",
+		tags: ["博客", "技术", "生活"],
+	},
+	{
+		id: 8,
+		title: "兰舟千帆之博客",
+		imgurl: "/assets/friends/daodaozi-xyz.webp",
+		desc: "浮生若梦，为欢几何",
+		siteurl: "https://daodaozi.xyz/",
+		tags: ["博客", "生活"],
+	},
+	{
+		id: 9,
+		title: "阳光开朗大男孩",
+		imgurl: "/assets/friends/gysy-ltd.jpg",
+		desc: "躺平中。。。",
+		siteurl: "https://gysy.ltd/",
+		tags: ["博客", "技术"],
+	},
 ];
 
 // 获取所有友情链接数据（稳定顺序，测试可复现）

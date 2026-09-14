@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const FRIEND_COUNT = 6;
+const FRIEND_COUNT = 9;
 
 test.describe("友链页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -8,15 +8,22 @@ test.describe("友链页", () => {
 		await expect(page.locator(".friend-card")).toHaveCount(FRIEND_COUNT);
 	});
 
-	test("仅渲染新的六个博客友链与本地图标", async ({ page }) => {
+	test("仅渲染九个博客友链与本地图标", async ({ page }) => {
 		const cards = page.locator(".friend-card");
 		await expect(cards.first()).toHaveAttribute(
 			"href",
 			"https://blog.hikarilan.life/?ref=www.perass.com",
 		);
 		await expect(cards.first()).toContainText("HikariLan's Blog");
-		await expect(cards.last()).toHaveAttribute("href", "https://tx1st.cn/");
-		await expect(cards.last()).toContainText("天行1st的博客");
+		await expect(page.locator('.friend-card[href="https://www.njfu-yangfan.top/"]')).toContainText(
+			"午安大电牛",
+		);
+		await expect(page.locator('.friend-card[href="https://daodaozi.xyz/"]')).toContainText(
+			"兰舟千帆之博客",
+		);
+		await expect(page.locator('.friend-card[href="https://gysy.ltd/"]')).toContainText(
+			"阳光开朗大男孩",
+		);
 		await expect(page.locator(".friend-card img")).toHaveCount(FRIEND_COUNT);
 		for (const src of await page
 			.locator(".friend-card img")
@@ -25,7 +32,7 @@ test.describe("友链页", () => {
 			)) {
 			expect(src).toMatch(/^\/assets\/friends\//);
 		}
-		await expect(page.locator(".friend-section__count")).toHaveText("6 个友链");
+		await expect(page.locator(".friend-section__count")).toHaveText("9 个友链");
 	});
 
 	test("搜索与标签筛选继续可用", async ({ page }) => {
