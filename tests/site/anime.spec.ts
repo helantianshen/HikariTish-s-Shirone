@@ -8,7 +8,7 @@ import { expect, test } from "@playwright/test";
  * 布局形态跟随全局文章列表偏好（localStorage `post-list-mode`，DisplaySettings
  * 切换广播 post-list-layout-change 事件）：grid 海报网格 / list 横向卡。
  * 数据来自 src/data/anime.ts（经 utils/anime-data.getAnimeList 稳定顺序），
- * 断言基于当前本地收藏数据集（19 条，封面全部本地化）；站点语言为 zh_CN。
+ * 断言基于当前本地收藏数据集（21 条，封面全部本地化）；站点语言为 zh_CN。
  */
 
 const INITIAL_VISIBLE_COUNT = 12;
@@ -77,7 +77,7 @@ test.describe("番剧页", () => {
 		// 官方 Chips 原子（filter 形态 + 状态前置图标），只列数据中出现的状态
 		const chips = page.locator(".anime-section__chips .m3-chip--filter");
 		await expect(chips).toHaveCount(3);
-		await expect(page.locator(".anime-section__count")).toHaveText("15 部番剧");
+		await expect(page.locator(".anime-section__count")).toHaveText("21 部番剧");
 	});
 
 	test("单选状态筛选（再点取消恢复全部，aria-pressed 同步 + URL ?status=）", async ({
@@ -90,8 +90,8 @@ test.describe("番剧页", () => {
 		await watchingChip.click();
 		await expect(watchingChip).toHaveAttribute("aria-pressed", "true");
 		await expect(page).toHaveURL(/[?&]status=watching/);
-		await expect(page.locator(".anime-card")).toHaveCount(4);
-		await expect(page.locator(".anime-section__count")).toHaveText("4 部番剧");
+		await expect(page.locator(".anime-card")).toHaveCount(5);
+		await expect(page.locator(".anime-section__count")).toHaveText("5 部番剧");
 		await watchingChip.click();
 		await expect(watchingChip).toHaveAttribute("aria-pressed", "false");
 		await expect(page.locator(".anime-card")).toHaveCount(
@@ -108,7 +108,7 @@ test.describe("番剧页", () => {
 			exact: true,
 		});
 		await expect(completedChip).toHaveAttribute("aria-pressed", "true");
-		await expect(page.locator(".anime-card")).toHaveCount(6);
+		await expect(page.locator(".anime-card")).toHaveCount(8);
 		await expect(page.locator(".anime-card__title").first()).toHaveText(
 			"莉可丽丝",
 		);
@@ -127,13 +127,16 @@ test.describe("番剧页", () => {
 			page.locator(".anime-section__loading .m3-loading--contained"),
 		).toBeVisible();
 		// 过渡收敛后展示 planned 收藏
-		await expect(page.locator(".anime-card")).toHaveCount(5);
+		await expect(page.locator(".anime-card")).toHaveCount(8);
 		await expect(page.locator(".anime-card__title")).toHaveText([
 			/关于邻家的天使大人/,
-			"总之就是非常可爱",
 			"前辈是男孩子",
 			"更衣人偶坠入爱河",
 			"Fate 系列",
+			"无职转生～到了异世界就拿出真本事～",
+			"魔王的女儿太温柔了！！",
+			"重启人生的千金小姐正在攻略龙帝陛下",
+			"魔女之旅",
 		]);
 		await expect(page.locator(".anime-section__loading")).toHaveCount(0);
 	});
