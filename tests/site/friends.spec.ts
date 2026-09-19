@@ -15,15 +15,15 @@ test.describe("友链页", () => {
 			"https://blog.hikarilan.life/?ref=www.perass.com",
 		);
 		await expect(cards.first()).toContainText("HikariLan's Blog");
-		await expect(page.locator('.friend-card[href="https://www.njfu-yangfan.top/"]')).toContainText(
-			"午安大电牛",
-		);
-		await expect(page.locator('.friend-card[href="https://daodaozi.xyz/"]')).toContainText(
-			"兰舟千帆之博客",
-		);
-		await expect(page.locator('.friend-card[href="https://gysy.ltd/"]')).toContainText(
-			"阳光开朗大男孩",
-		);
+		await expect(
+			page.locator('.friend-card[href="https://www.njfu-yangfan.top/"]'),
+		).toContainText("午安大电牛");
+		await expect(
+			page.locator('.friend-card[href="https://fan.daodaozi.xyz/"]'),
+		).toContainText("兰舟千帆");
+		await expect(
+			page.locator('.friend-card[href="https://gysy.ltd/"]'),
+		).toContainText("阳光开朗大男孩");
 		await expect(page.locator(".friend-card img")).toHaveCount(FRIEND_COUNT);
 		for (const src of await page
 			.locator(".friend-card img")

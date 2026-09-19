@@ -61,7 +61,6 @@ const host = $derived.by(() => {
 
 <style lang="stylus">
 .friend-card
-	position: relative
 	display: flex
 	flex-direction: column
 	box-sizing: border-box

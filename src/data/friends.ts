@@ -74,10 +74,10 @@ export const friendsData: FriendItem[] = [
 	},
 	{
 		id: 8,
-		title: "兰舟千帆之博客",
+		title: "兰舟千帆",
 		imgurl: "/assets/friends/daodaozi-xyz.webp",
 		desc: "浮生若梦，为欢几何",
-		siteurl: "https://daodaozi.xyz/",
+		siteurl: "https://fan.daodaozi.xyz/",
 		tags: ["博客", "生活"],
 	},
 	{

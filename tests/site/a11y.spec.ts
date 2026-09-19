@@ -25,8 +25,7 @@ const pages = [
 	{ name: "时间线", path: "/timeline/" },
 	{ name: "相册", path: "/albums/" },
 	{ name: "关于", path: "/about/" },
-	{ name: "文章页", path: "/posts/guide/" },
-	{ name: "MDX文章页", path: "/posts/mdx-showcase/" },
+	{ name: "文章页", path: "/posts/gin/快速入门/" },
 	{ name: "分类索引", path: "/categories/" },
 	{ name: "标签索引", path: "/tags/" },
 ];
