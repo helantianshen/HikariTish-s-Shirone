@@ -28,6 +28,7 @@
 | `src/types/commentConfig.ts` | 配置类型（字段带中文注释） |
 | `src/components/organisms/comment/CommentSection.astro` | 消费方：短路 + 动态导入 |
 | `src/components/organisms/comment/Twikoo.astro` | 特性组件：样式内嵌 + 运行时懒加载 |
+| `src/components/organisms/comment/Giscus.astro` | 第二个 Provider 参考实现：一次性脚本注入 + 主题事件同步 |
 | `src/types/stylus.d.ts` | `stylus` 包最小类型声明（构建期编译样式用） |
 | `src/utils/script-loader.ts` | `loadScriptOnce()` 动态加载第三方 SDK 并去重 |
 
@@ -59,6 +60,9 @@ if (!options || !postCommentEnabled) {
 ```
 
 - 规则：可选特性默认 `enable: false`；校验逻辑收敛在 config 的 `resolve*Options()` 里，组件只消费解析结果。
+- 多 Provider 特性（如评论的 twikoo / giscus）：`resolve*Options()` 返回判别联合，
+  每个分支校验各自的必填字段——Giscus 的 `repo` / `repoId` / `categoryId`
+  任一缺失同样返回 `null`，与未启用完全等价。
 
 ### L2 动态导入组件，避免进主 bundle
 
@@ -119,10 +123,18 @@ const twikooStyles = await new Promise<string>((resolve, reject) => {
 - **视口懒加载**：`IntersectionObserver` 进入视口（预留 `rootMargin`）才执行初始化，
   进入视口前不加载外部脚本；
 - **SDK 去重**：`loadScriptOnce(scriptUrl)` 保证同一脚本只注入一次（Swup 多次换页安全）；
+- **一次性脚本的例外**：giscus 的 `client.js` 是绑定 `document.currentScript` 的一次性
+  IIFE，复用 `loadScriptOnce()` 会让 Swup 换页后无法重新挂载；此时每次挂载注入新的
+  `<script>` 元素（HTTP 缓存下成本极低），旧元素随容器替换自然丢弃，见 `Giscus.astro`；
 - **加载状态**：优先用 CSS `:has()` 感知第三方组件的加载遮罩（如
   `&:has(> .el-loading-mask:not([style*="none"]))`），**不要**引入
   `MutationObserver` / 轮询 / 额外事件监听；
 - **加载指示器**：复用项目原子组件（如 `LoadingIndicator`），不复制第三方样式。
+- **iframe 的 `color-scheme` 只能放宽，不能收窄**：第三方 iframe 外壳必须声明
+  `color-scheme: light dark`（与 giscus 自带 `default.css` 一致）。收窄成 `normal` /
+  `only light` 后，浏览器偏好为暗色而站点仍是亮色时，Chromium 会给这个 light-only 的
+  iframe 强制铺一层不透明深色画布，评论区出现黑底（见 `rules/pitfalls.md` §2.3）。
+  外壳只负责声明自身支持的配色方案，iframe 内部配色仍由第三方 `data-theme` 自绘。
 
 ---
 

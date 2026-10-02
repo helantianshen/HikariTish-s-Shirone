@@ -6,7 +6,7 @@
  */
 import { getSortedPosts } from "./content-utils";
 import { formatDateToYYYYMMDD } from "./date-utils";
-import { getPostUrlBySlug } from "./url-utils";
+import { getPostUrl } from "./url-utils.ts";
 
 export interface CalendarPost {
 	id: string;
@@ -41,7 +41,7 @@ export async function getCalendarData(): Promise<CalendarData> {
 		const item: CalendarPost = {
 			id: post.id,
 			title: post.data.title,
-			url: getPostUrlBySlug(post.id),
+			url: getPostUrl(post),
 			date,
 		};
 		(postsByDate[date] ??= []).push(item);

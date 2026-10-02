@@ -1,5 +1,5 @@
-import Key from "../i18nKey";
-import type { Translation } from "../translation";
+import Key from "../i18nKey-runtime.mjs";
+import type { Translation } from "../translation.ts";
 
 export const vi: Translation = {
 	[Key.home]: "Trang chủ",
@@ -91,6 +91,22 @@ export const vi: Translation = {
 	[Key.devicesViewSpecs]: "Xem chi tiết",
 	[Key.devicesFeatured]: "Nổi bật",
 
+	[Key.games]: "Trò chơi",
+	[Key.gamesBanner]:
+		"Những trò chơi tôi chơi — ảnh bìa, điểm số, thời gian chơi và đánh giá ngắn.",
+	[Key.gamesCounts]: "trò chơi",
+	[Key.gamesNoResults]: "Không có trò chơi phù hợp với bộ lọc",
+	[Key.gamesSearchPlaceholder]: "Tìm theo tên, nhà phát triển hoặc thể loại...",
+	[Key.gamesCategoryLabel]: "Danh mục trò chơi",
+	[Key.gamesStatusPlaying]: "Đang chơi",
+	[Key.gamesStatusCompleted]: "Đã hoàn thành",
+	[Key.gamesStatusBacklog]: "Chờ chơi",
+	[Key.gamesStatusWishlist]: "Danh sách mong muốn",
+	[Key.gamesViewDetails]: "Trang cửa hàng",
+	[Key.gamesFeatured]: "Nổi bật",
+	[Key.gamesHours]: "giờ",
+	[Key.gamesRating]: "Đánh giá",
+
 	[Key.timeline]: "Dòng thời gian",
 	[Key.timelineBanner]:
 		"Hành trình phát triển, các cột mốc và khoảnh khắc đáng nhớ.",
@@ -139,11 +155,26 @@ export const vi: Translation = {
 
 	[Key.tags]: "Thẻ",
 	[Key.categories]: "Danh mục",
+	[Key.series]: "Loạt bài",
+	[Key.seriesCount]: "loạt bài",
+	[Key.seriesCounts]: "loạt bài",
+	[Key.seriesStatusOngoing]: "Đang tiếp tục",
+	[Key.seriesStatusCompleted]: "Đã hoàn thành",
+	[Key.seriesPartOf]: "Bài viết này thuộc loạt bài",
+	[Key.seriesPart]: "Phần {index} / {total}",
+	[Key.seriesPrevInSeries]: "Bài trước trong loạt bài",
+	[Key.seriesNextInSeries]: "Bài tiếp theo trong loạt bài",
+	[Key.seriesViewAll]: "Xem tất cả loạt bài",
 	[Key.recentPosts]: "Bài viết mới nhất",
 	[Key.tableOfContents]: "Mục lục",
 	[Key.formulaScrollable]: "Công thức có thể cuộn ngang",
+	[Key.fieldRequired]: "Bắt buộc",
+	[Key.fieldOptional]: "Tùy chọn",
+	[Key.fieldDeprecated]: "Đã lỗi thời",
 	[Key.codeBlockExpand]: "Mở rộng khối mã",
 	[Key.codeBlockCollapse]: "Thu gọn khối mã",
+	[Key.codeTreeExpand]: "Mở rộng cây mã",
+	[Key.codeTreeCollapse]: "Đóng chế độ mở rộng",
 	[Key.announcement]: "Thông báo",
 	[Key.announcementClose]: "Đóng thông báo",
 
@@ -209,6 +240,7 @@ export const vi: Translation = {
 	[Key.musicHidePlaylist]: "Ẩn danh sách phát",
 	[Key.musicEmpty]: "Danh sách phát chưa có bài hát",
 	[Key.musicLoading]: "Đang tải nhạc...",
+	[Key.musicNotRequested]: "Chưa được yêu cầu",
 	[Key.musicNowPlaying]: "Đang phát: {title}",
 	[Key.musicErrorEmptyPlaylist]: "Danh sách phát trống.",
 	[Key.musicErrorSourceUnavailable]: "Không thể phát bài hát này.",
@@ -257,7 +289,9 @@ export const vi: Translation = {
 	[Key.randomReadingSubtitle]: "Một lựa chọn ổn định từ các bài viết khác",
 	[Key.copySuccess]: "Đã sao chép vào bộ nhớ tạm",
 	[Key.copyLink]: "Sao chép liên kết",
+	[Key.copySelection]: "Sao chép",
 	[Key.copyFailed]: "Sao chép liên kết thất bại. Vui lòng sao chép thủ công.",
+	[Key.sharePageLink]: "Chia sẻ liên kết trang",
 
 	[Key.shareArticle]: "Chia sẻ bài viết",
 	[Key.shareArticleDescription]:
@@ -270,6 +304,10 @@ export const vi: Translation = {
 	[Key.retry]: "Thử lại",
 	[Key.backToTop]: "Về đầu trang",
 	[Key.backToComment]: "Đến bình luận",
+	[Key.notFound]: "404",
+	[Key.notFoundTitle]: "Trang này đã lạc đường",
+	[Key.notFoundDescription]:
+		"Có thể nó đã được di chuyển, lưu trữ hoặc chưa từng tồn tại.",
 	[Key.backToHome]: "Về trang chủ",
 	[Key.close]: "Đóng",
 	[Key.scanToRead]: "Quét mã để đọc bài viết",

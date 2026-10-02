@@ -23,7 +23,14 @@ import { onMount } from "svelte";
 let {
 	moments = [] as MomentItem[],
 	author = { name: "", avatar: "", url: "/about/" } as MomentAuthor,
-}: { moments?: MomentItem[]; author?: MomentAuthor } = $props();
+	title = i18n(I18nKey.moments),
+	subtitle = i18n(I18nKey.momentsBanner),
+}: {
+	moments?: MomentItem[];
+	author?: MomentAuthor;
+	title?: string;
+	subtitle?: string;
+} = $props();
 
 const MOMENTS_PAGE_SIZE = 10;
 
@@ -101,7 +108,11 @@ $effect(() => {
 	if (q) params.set("q", q);
 	if (t) params.set("tag", t);
 	const qs = params.toString();
-	history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+	history.replaceState(
+		history.state,
+		"",
+		qs ? `?${qs}` : window.location.pathname,
+	);
 });
 
 onMount(() => {
@@ -118,8 +129,8 @@ onMount(() => {
 <Card color="var(--card-bg)" radius="l" class="moment-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:auto-awesome-outline-rounded"
-		title={i18n(I18nKey.moments)}
-		subtitle={i18n(I18nKey.momentsBanner)}
+		{title}
+		{subtitle}
 	/>
 
 	{#if moments.length > 0}
@@ -252,7 +263,8 @@ onMount(() => {
 
 	&__list
 		display: grid
-		grid-template-columns: 1fr
+		/* 显式下限 0：长链接等不可断 token 的 min-content 不得撑宽网格轨道 */
+		grid-template-columns: minmax(0, 1fr)
 		gap: 1rem
 		padding-top: 1.5rem
 

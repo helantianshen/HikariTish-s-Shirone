@@ -1,3 +1,5 @@
+export type { PermalinkConfig } from "./permalinkConfig.ts";
+
 import type { AUTO_MODE, DARK_MODE, LIGHT_MODE } from "@constants/constants";
 import type { TextureConfig } from "./textureConfig";
 
@@ -20,6 +22,59 @@ export type DisplaySettingsConfig = {
 	texture?: boolean;
 };
 
+export type BannerThemeSource = {
+	light: string[];
+	dark: string[];
+};
+
+export type BannerSourceValue = string[] | BannerThemeSource;
+
+export type BannerConfig = {
+	src: {
+		desktop: BannerSourceValue;
+		mobile: BannerSourceValue;
+	};
+	position?: "top" | "center" | "bottom";
+	dim: {
+		enable: boolean;
+		opacity: number;
+	};
+	homeText: {
+		enable: boolean;
+		title: string;
+		/** 首页副标题文本，支持单条字符串或多条交替循环的字符串数组 */
+		subtitle: string | string[];
+		typewriter: {
+			enable: boolean;
+			/** 打字速度（每个字符间隔，毫秒，默认 120） */
+			speed: number;
+			/** 回退反向删除速度（每个字符间隔，毫秒，默认 50） */
+			deleteSpeed?: number;
+			/** 打字完成后等待停顿时间（毫秒，默认 2000） */
+			pauseTime?: number;
+			/** 完成后是否循环播放（默认 true） */
+			loop: boolean;
+		};
+	};
+	carousel: {
+		enable: boolean;
+		interval: number;
+		/** 交叉淡入淡出过渡时长（毫秒，默认 1200） */
+		fadeDuration?: number;
+		/** 运镜呼吸动画模式："ken-burns"（默认，序列运镜）| "zoom-in" | "zoom-out" | "pan-left" | "pan-right" | "none" */
+		animation?:
+			| "ken-burns"
+			| "zoom-in"
+			| "zoom-out"
+			| "pan-left"
+			| "pan-right"
+			| "none";
+	};
+	waves: {
+		enable: boolean;
+	};
+};
+
 export type SiteConfig = {
 	site: string;
 	base?: string;
@@ -27,6 +82,8 @@ export type SiteConfig = {
 	/** 首页浏览器标签标题；未配置时回退为“站点标题 - 副标题”。 */
 	browserTitle?: string;
 	subtitle: string;
+	/** 默认社交媒体分享预览图（og:image / twitter:image），支持本地相对路径或远程绝对链接。未配置时自动回退为第一张桌面版横幅壁纸。 */
+	ogImage?: string;
 	topAppBar: {
 		/** 桌面端标题与导航内容组的对齐方式。 */
 		contentAlign: TopAppBarContentAlign;
@@ -61,51 +118,7 @@ export type SiteConfig = {
 	};
 	/** 页面背景纹理系统配置，支持布尔值直接开关或详细配置对象 */
 	texture?: boolean | TextureConfig;
-	banner: {
-		src: {
-			desktop: string[];
-			mobile: string[];
-		};
-		position?: "top" | "center" | "bottom";
-		dim: {
-			enable: boolean;
-			opacity: number;
-		};
-		homeText: {
-			enable: boolean;
-			title: string;
-			/** 首页副标题文本，支持单条字符串或多条交替循环的字符串数组 */
-			subtitle: string | string[];
-			typewriter: {
-				enable: boolean;
-				/** 打字速度（每个字符间隔，毫秒，默认 120） */
-				speed: number;
-				/** 回退反向删除速度（每个字符间隔，毫秒，默认 50） */
-				deleteSpeed?: number;
-				/** 打字完成后等待停顿时间（毫秒，默认 2000） */
-				pauseTime?: number;
-				/** 完成后是否循环播放（默认 true） */
-				loop: boolean;
-			};
-		};
-		carousel: {
-			enable: boolean;
-			interval: number;
-			/** 交叉淡入淡出过渡时长（毫秒，默认 1200） */
-			fadeDuration?: number;
-			/** 运镜呼吸动画模式："ken-burns"（默认，序列运镜）| "zoom-in" | "zoom-out" | "pan-left" | "pan-right" | "none" */
-			animation?:
-				| "ken-burns"
-				| "zoom-in"
-				| "zoom-out"
-				| "pan-left"
-				| "pan-right"
-				| "none";
-		};
-		waves: {
-			enable: boolean;
-		};
-	};
+	banner: BannerConfig;
 	/** Markdown 正文图片处理配置。 */
 	imageOptimization?: {
 		/** 添加 `referrerpolicy="no-referrer"` 的远程图片域名，支持 `*.example.com` 通配符。 */
@@ -165,7 +178,11 @@ export type BlogPostData = {
 	draft?: boolean;
 	image?: string;
 	category?: string;
+	alias?: string;
+	permalink?: string;
 	prevTitle?: string;
+	prevUrl?: string;
+	nextUrl?: string;
 	prevSlug?: string;
 	nextTitle?: string;
 	nextSlug?: string;

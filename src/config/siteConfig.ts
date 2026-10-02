@@ -121,12 +121,8 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		style: "dual",
 	},
 	favicon: [
-		// Leave this array empty to use the default favicon
-		// {
-		//   src: '/favicon/icon.png',    // Path of the favicon, relative to the /public directory
-		//   theme: 'light',              // (Optional) Either 'light' or 'dark', set only if you have different favicons for light and dark mode
-		//   sizes: '32x32',              // (Optional) Only if you have favicons of different sizes
-		// }
+		// 浏览器标签页图标，路径相对于 public 目录。
+		{ src: "/logo/icon.webp" },
 	],
 });
 

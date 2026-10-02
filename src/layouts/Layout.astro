@@ -3,6 +3,8 @@ import { Font } from "astro:assets";
 import Snackbar from "@components/atoms/overlay/Snackbar.svelte";
 import ConfigCarrier from "@components/system/ConfigCarrier.astro";
 import UmamiRuntime from "@components/system/UmamiRuntime.astro";
+import { resolveAsset } from "@utils/asset-utils";
+import { pathsEqual, toAbsoluteUrl, url } from "@utils/url-utils";
 import {
 	expressiveCodeConfig,
 	profileConfig,
@@ -24,10 +26,9 @@ import {
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
 import { defaultFavicons } from "../constants/icon";
-import type { Favicon } from "../types/config";
+import type { BannerSourceValue, Favicon } from "../types/config";
 import { createFontRoleStyle } from "../utils/font-options";
 import { resolvePageWidth } from "../utils/responsive-utils";
-import { pathsEqual, url } from "../utils/url-utils";
 import "../styles/main.css";
 import "../styles/font-faces.css";
 import textureStyles from "../styles/textures.css?raw";
@@ -35,16 +36,46 @@ import textureStyles from "../styles/textures.css?raw";
 interface Props {
 	title?: string;
 	banner?: string;
+	ogImage?: string;
 	description?: string;
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	page?: SidebarPage;
 }
 
-let { title, description, lang, setOGTypeArticle, page } = Astro.props;
+let { title, banner, ogImage, description, lang, setOGTypeArticle, page } =
+	Astro.props;
 
 const initialPage =
 	page ?? (pathsEqual(Astro.url.pathname, url("/")) ? "home" : undefined);
+
+// `Astro.url` in a static build does not inherit a `site` set through an
+// integration's `updateConfig()` — Astro snapshots the build origin in the
+// build constructor before the `astro:config:setup` hook runs. Derive the
+// absolute URL from `Astro.site` ourselves so og/twitter URLs stay correct.
+const canonicalUrl = Astro.site
+	? new URL(Astro.url.pathname + Astro.url.search, Astro.site)
+	: Astro.url;
+function getFirstBannerImage(source: BannerSourceValue | undefined): string {
+	if (!source) return "";
+	if (Array.isArray(source)) return source[0] || "";
+	return source.light[0] || source.dark[0] || "";
+}
+
+function hasBannerImages(source: BannerSourceValue | undefined): boolean {
+	if (!source) return false;
+	if (Array.isArray(source)) return source.length > 0;
+	return source.light.length > 0 || source.dark.length > 0;
+}
+
+const defaultSocialImage =
+	siteConfig.ogImage ||
+	getFirstBannerImage(siteConfig.banner.src.desktop) ||
+	getFirstBannerImage(siteConfig.banner.src.mobile) ||
+	"";
+const candidateOgImage = ogImage || banner || defaultSocialImage;
+const resolvedOgImage = await resolveAsset(candidateOgImage);
+const absoluteOgImage = toAbsoluteUrl(resolvedOgImage, canonicalUrl);
 
 const configHue = siteConfig.themeColor.hue;
 const lightTheme =
@@ -57,8 +88,8 @@ const defaultTextureOpacity = textureOptions.defaultOpacity;
 const textureEnabled = textureOptions.enable;
 const umamiOptions = resolveUmamiOptions(umamiConfig);
 
-const hasDesktopBanner = siteConfig.banner.src.desktop.length > 0;
-const hasMobileBanner = siteConfig.banner.src.mobile.length > 0;
+const hasDesktopBanner = hasBannerImages(siteConfig.banner.src.desktop);
+const hasMobileBanner = hasBannerImages(siteConfig.banner.src.mobile);
 
 let pageTitle: string;
 if (title) {
@@ -97,19 +128,21 @@ const hasMonoFont =
 		<meta name="author" content={profileConfig.name}>
 
 		<meta property="og:site_name" content={siteConfig.title}>
-		<meta property="og:url" content={Astro.url}>
+		<meta property="og:url" content={canonicalUrl}>
 		<meta property="og:title" content={pageTitle}>
 		<meta property="og:description" content={description || pageTitle}>
+		{absoluteOgImage && <meta property="og:image" content={absoluteOgImage} />}
 		{setOGTypeArticle ? (
 			<meta property="og:type" content="article" />
 		) : (
 			<meta property="og:type" content="website" />
 		)}
 
-		<meta name="twitter:card" content="summary_large_image">
-		<meta property="twitter:url" content={Astro.url}>
+		<meta name="twitter:card" content={absoluteOgImage ? "summary_large_image" : "summary"}>
+		<meta property="twitter:url" content={canonicalUrl}>
 		<meta name="twitter:title" content={pageTitle}>
 		<meta name="twitter:description" content={description || pageTitle}>
+		{absoluteOgImage && <meta name="twitter:image" content={absoluteOgImage} />}
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
@@ -255,9 +288,7 @@ const hasMonoFont =
 import { initLastUpdatedNotices } from "../utils/last-updated-notice";
 import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
 import { WALLPAPER_MODE_CHANGE_EVENT, BANNER_HEIGHT, BANNER_HEIGHT_EXTEND } from "../constants/constants";
-import { showSnackbar } from "../utils/snackbar";
-import I18nKey from "../i18n/i18nKey";
-import { i18n } from "../i18n/translation";
+import { copyPageLink } from "../utils/copy-page-link";
 
 function setClickOutsideToClose(panel: string, ignores: string[]) {
 	document.addEventListener('click', event => {
@@ -288,12 +319,7 @@ document.addEventListener("click", async (event) => {
 	const target = event.target;
 	if (!(target instanceof Element) || !target.closest("#copy-post-link")) return;
 
-	try {
-		await navigator.clipboard.writeText(window.location.href);
-		showSnackbar(i18n(I18nKey.copySuccess), { icon: "material-symbols:link" });
-	} catch {
-		showSnackbar(i18n(I18nKey.copyFailed));
-	}
+	void copyPageLink();
 });
 
 const setup = () => {
@@ -339,6 +365,7 @@ function scrollFunction() {
 	const overBanner = bannerVisible && scrollTop < Math.max(0, bannerBottom - 64);
 	document.body.dataset.bannerScrolled = String(!overBanner);
 	navbar?.classList.toggle('top-app-bar--transparent', overBanner);
+	navbar?.classList.toggle('top-app-bar--scrolled', scrollTop > 16);
 }
 window.addEventListener('scroll', scrollFunction, { passive: true });
 window.addEventListener('resize', () => {

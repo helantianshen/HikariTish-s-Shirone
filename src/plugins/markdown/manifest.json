@@ -48,6 +48,11 @@
 			"styles": ["src/styles/markdown/expressive-code.css"]
 		},
 		{
+			"id": "fields",
+			"syntaxes": ["fields"],
+			"styles": ["src/styles/markdown/fields.css"]
+		},
+		{
 			"id": "github-card",
 			"syntaxes": ["github-card"],
 			"styles": ["src/styles/markdown/github-card.css"]
@@ -141,8 +146,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": [
 				"tests/plugins/markdown/inline/abbreviations.test.mjs",
@@ -268,8 +273,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": [
 				"tests/plugins/markdown/containers/admonitions.test.mjs",
@@ -586,8 +591,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": [
 				"tests/plugins/markdown/containers/collapse-panels.test.mjs",
@@ -732,6 +737,63 @@
 			"notes": ["元数据具体解析规则由 Expressive Code 及已注册插件定义。"]
 		},
 		{
+			"id": "fields",
+			"name": "Field Cards",
+			"status": "stable",
+			"category": "container",
+			"source": "shirone",
+			"summary": "将 API、组件 Props 或配置字段渲染为结构化参数卡片。",
+			"forms": [
+				{
+					"kind": "container-directive",
+					"pattern": ":::: field-group ... ::: field name ... ::::",
+					"example": ":::: field-group\\n\\n::: field title\\n@type string\\n@optional\\n\\nDescription.\\n:::\\n\\n::::"
+				}
+			],
+			"attributes": [
+				{
+					"name": "name",
+					"required": true,
+					"values": "non-empty text",
+					"default": null
+				},
+				{
+					"name": "@type",
+					"required": false,
+					"values": "text",
+					"default": null
+				},
+				{
+					"name": "@default",
+					"required": false,
+					"values": "text",
+					"default": null
+				},
+				{
+					"name": "@required | @optional | @deprecated",
+					"required": false,
+					"values": "flag",
+					"default": null
+				}
+			],
+			"implementation": [
+				"src/plugins/markdown/remark-fields.mjs",
+				"src/plugins/markdown/containers/rehype-fields.mjs"
+			],
+			"registeredIn": "src/utils/markdown-processor.mjs",
+			"styles": ["src/styles/markdown/fields.css"],
+			"runtime": {
+				"mode": "none",
+				"modules": [],
+				"network": []
+			},
+			"docs": ["docs/markdown-fields.md"],
+			"tests": ["tests/plugins/markdown/containers/fields.test.mjs"],
+			"notes": [
+				"无效或不完整的字段标签保留为可读 Markdown；组件为纯 SSR 输出，不增加客户端运行时。"
+			]
+		},
+		{
 			"id": "file-tree",
 			"name": "File Tree",
 			"status": "stable",
@@ -781,8 +843,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": [
 				"tests/plugins/markdown/containers/file-tree.test.mjs",
@@ -923,8 +985,8 @@
 				"network": ["author-declared image URLs only"]
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": ["tests/plugins/rehype-markdown-images.test.mjs"],
 			"notes": ["非法或越界宽度令牌保留在 alt，不静默改写。"]
@@ -976,8 +1038,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": ["tests/plugins/markdown/inline/includes.test.mjs"],
 			"notes": [
@@ -1025,8 +1087,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": [
 				"tests/plugins/markdown/inline/markers.test.mjs",
@@ -1066,7 +1128,11 @@
 				"network": []
 			},
 			"docs": [".agents/skills/shirone-markdown-syntax/SKILL.md"],
-			"tests": ["tests/site/post-encryption.spec.ts"],
+			"tests": [
+				"tests/plugins/markdown/katex-version.test.mjs",
+				"tests/site/math.spec.ts",
+				"tests/site/post-encryption.spec.ts"
+			],
 			"notes": ["解析由 remark-math 与 rehype-katex 提供。"]
 		},
 		{
@@ -1144,8 +1210,8 @@
 				"network": []
 			},
 			"docs": [
-				"docs/markdown-extensions.md",
-				".agents/skills/shirone-markdown-syntax/SKILL.md"
+				".agents/skills/shirone-markdown-syntax/SKILL.md",
+				"docs/markdown-extensions.md"
 			],
 			"tests": [
 				"tests/plugins/markdown/containers/option-groups.test.mjs",

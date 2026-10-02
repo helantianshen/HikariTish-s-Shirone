@@ -13,6 +13,7 @@ import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { ANIME_STATUS_META } from "@utils/anime/status";
 import { reveal } from "@utils/motion";
+import { url } from "@utils/url-utils";
 import type { AnimeItem } from "../../data/anime";
 
 let {
@@ -22,9 +23,11 @@ let {
 }: { anime: AnimeItem; delay?: number } = $props();
 
 const statusMeta = $derived(ANIME_STATUS_META[anime.status]);
-const isWatching = $derived(anime.status === "watching");
+const isWatching = $derived(
+	anime.status === "watching" && anime.progress !== undefined,
+);
 const progressRatio = $derived(
-	anime.progress.total > 0
+	anime.progress && anime.progress.total > 0
 		? Math.min(anime.progress.watched / anime.progress.total, 1)
 		: 0,
 );
@@ -42,7 +45,13 @@ const metaLine = $derived(
 	<!-- 封面内部内容（img/占位 + 播放层 + 评分）：link/非 link 两分支共享，避免重复维护 -->
 	{#snippet coverContent()}
 		{#if anime.cover}
-			<img class="anime-card__cover-img" src={anime.cover} alt={anime.title} loading="lazy" />
+			<img
+				class="anime-card__cover-img"
+				src={url(anime.cover)}
+				alt={anime.title}
+				loading="lazy"
+				referrerpolicy="no-referrer"
+			/>
 		{:else}
 			<span class="anime-card__placeholder" aria-hidden="true">
 				<Icon icon="material-symbols:live-tv-outline-rounded" />
@@ -87,7 +96,7 @@ const metaLine = $derived(
 
 		<span class="anime-card__title" title={anime.title}>{anime.title}</span>
 
-		{#if isWatching}
+		{#if isWatching && anime.progress}
 			<div class="anime-card__progress">
 				<span class="anime-card__progress-track">
 					<ProgressIndicator
@@ -230,8 +239,8 @@ const metaLine = $derived(
 		flex-direction: column
 		flex: 1
 		min-width: 0
-		gap: 0.375rem
-		padding: 0.75rem 0.875rem 0.875rem
+		gap: var(--m3e-space-1)
+		padding: var(--m3e-space-3) var(--m3e-space-4) var(--m3e-space-4)
 
 	&__header-row
 		display: flex

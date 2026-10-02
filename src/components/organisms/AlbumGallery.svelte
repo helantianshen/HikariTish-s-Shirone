@@ -3,6 +3,7 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { openFancyboxGallery } from "@utils/fancybox-handler";
+import { url } from "@utils/url-utils";
 import type { AlbumLayout, AlbumPhoto } from "@/types/album";
 
 let {
@@ -23,7 +24,10 @@ function photoRatio(photo: AlbumPhoto): number | undefined {
 }
 
 function orientationPriority(photo: AlbumPhoto): number {
-	const value = photoRatio(photo);
+	// Only authoritative metadata may affect ordering; measured image ratios arrive
+	// asynchronously and must not reshuffle an already rendered masonry grid.
+	const value =
+		photo.width && photo.height ? photo.width / photo.height : undefined;
 	if (value === undefined || value === 1) return 1;
 	return value < 1 ? 0 : 2;
 }
@@ -50,7 +54,8 @@ function rememberNaturalRatio(photo: AlbumPhoto, event: Event) {
 function openPhoto(event: MouseEvent, photo: AlbumPhoto) {
 	event.preventDefault();
 	event.stopPropagation();
-	void openFancyboxGallery([{ src: photo.src }]);
+	const fullSrc = photo.src ? url(photo.src) : "";
+	void openFancyboxGallery([{ src: fullSrc }]);
 }
 
 function ratio(photo: AlbumPhoto): string {
@@ -75,9 +80,11 @@ function ratio(photo: AlbumPhoto): string {
 						onclick={(event) => openPhoto(event, photo)}
 				>
 					<img
-					src={photo.thumbnail || photo.src}
-					alt={photo.alt}
-					loading="lazy"
+					src={url(photo.thumbnail || photo.src)}
+						alt={photo.alt}
+						width={photo.width}
+						height={photo.height}
+						loading="lazy"
 					decoding="async"
 					referrerpolicy="no-referrer"
 					onload={(event) => rememberNaturalRatio(photo, event)}

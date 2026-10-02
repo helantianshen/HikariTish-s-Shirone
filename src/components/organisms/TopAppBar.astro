@@ -34,7 +34,7 @@ function isActive(link: (typeof links)[number]): boolean {
 <div
 	id="navbar"
 	class:list={[
-		"top-app-bar fixed top-0 left-0 right-0 z-50 onload-animation bg-[color-mix(in_oklab,var(--surface-container-low)_94%,transparent)] shadow-[var(--m3e-elevation-1)] backdrop-blur-md transition",
+		"top-app-bar fixed top-0 left-0 right-0 z-50 onload-animation backdrop-blur-md transition",
 		className,
 	]}
 >
@@ -57,7 +57,7 @@ function isActive(link: (typeof links)[number]): boolean {
 					<div class="top-app-bar__nav-group" data-nav-group>
 						{link.children ? (
 							<button class:list={[
-								"top-app-bar__nav-link m3-state-layer relative flex h-10 items-center gap-1 px-3 text-sm font-bold text-[var(--on-surface-variant)] transition-colors hover:text-[var(--on-surface)]",
+								"top-app-bar__nav-link m3-state-layer relative flex h-10 items-center gap-1 px-2 xl:px-3 text-sm font-bold text-[var(--on-surface-variant)] transition-colors hover:text-[var(--on-surface)]",
 								active && "top-app-bar__nav-link--active",
 							]} aria-expanded="false">
 								{link.icon && <Icon name={link.icon} class="text-[1.1rem]"></Icon>}
@@ -67,7 +67,7 @@ function isActive(link: (typeof links)[number]): boolean {
 						) : (
 							<a href={href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined}
 								aria-current={active ? "page" : undefined} data-nav-key={link.pageKey ?? ""}
-								class:list={["top-app-bar__nav-link m3-state-layer relative flex h-10 items-center gap-1 px-3 text-sm font-bold text-[var(--on-surface-variant)] transition-colors hover:text-[var(--on-surface)]", active && "top-app-bar__nav-link--active"]}>
+								class:list={["top-app-bar__nav-link m3-state-layer relative flex h-10 items-center gap-1 px-2 xl:px-3 text-sm font-bold text-[var(--on-surface-variant)] transition-colors hover:text-[var(--on-surface)]", active && "top-app-bar__nav-link--active"]}>
 								{link.icon && <Icon name={link.icon} class="text-[1.1rem]"></Icon>}{link.name}
 								{link.external && <Icon name="material-symbols:arrow-outward-rounded" class="ml-1 text-[0.875rem]"></Icon>}
 							</a>
@@ -229,11 +229,26 @@ document.addEventListener('swup:content:replace', bindSearchTriggers);
 </script>}
 
 <style>
+	.top-app-bar__nav {
+		width: max-content;
+	}
+
+	.top-app-bar__nav-link {
+		white-space: nowrap;
+	}
+
 	.top-app-bar {
+		background: color-mix(in oklab, var(--surface) 92%, transparent);
+		box-shadow: var(--m3e-elevation-1);
 		transition:
 			background-color var(--m3e-duration-medium) var(--m3e-easing-standard),
 			box-shadow var(--m3e-duration-medium) var(--m3e-easing-standard),
 			color var(--m3e-duration-short) var(--m3e-easing-standard);
+	}
+
+	.top-app-bar--scrolled:not(.top-app-bar--transparent) {
+		background: color-mix(in oklab, var(--surface-container) 95%, transparent);
+		box-shadow: var(--m3e-elevation-2);
 	}
 
 		.top-app-bar--transparent {

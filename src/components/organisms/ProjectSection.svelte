@@ -16,7 +16,14 @@ import type { ProjectCategory, ProjectItem } from "@/types/projectsConfig";
 let {
 	categories = [] as ProjectCategory[],
 	items = [] as ProjectItem[],
-}: { categories?: ProjectCategory[]; items?: ProjectItem[] } = $props();
+	title = i18n(I18nKey.projects),
+	subtitle = i18n(I18nKey.projectsBanner),
+}: {
+	categories?: ProjectCategory[];
+	items?: ProjectItem[];
+	title?: string;
+	subtitle?: string;
+} = $props();
 
 let query = $state("");
 let selectedCategory = $state("");
@@ -79,7 +86,11 @@ $effect(() => {
 	if (c) params.set("category", c);
 	if (q.trim()) params.set("q", q.trim());
 	const qs = params.toString();
-	history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+	history.replaceState(
+		history.state,
+		"",
+		qs ? `?${qs}` : window.location.pathname,
+	);
 });
 
 /** 瀑布流：复用文章列表的最短列打包（utils/masonry.ts）。
@@ -111,8 +122,8 @@ $effect(() => {
 <Card color="var(--card-bg)" radius="l" class="projects-section px-8 py-6">
 	<PageHeader
 		icon="material-symbols:deployed-code-outline-rounded"
-		title={i18n(I18nKey.projects)}
-		subtitle={i18n(I18nKey.projectsBanner)}
+		{title}
+		{subtitle}
 	/>
 
 	{#if enabledItems.length > 0}

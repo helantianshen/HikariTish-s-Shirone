@@ -1,110 +1,21 @@
-import { existsSync } from "node:fs";
-import { dirname, extname, join, relative, resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import type { Plugin } from "vite";
 import { normalisePath } from "./paths.ts";
+import {
+	createOverlayTargets,
+	overrideKey,
+	probe,
+	type OverrideRegistryRef,
+} from "./registry.ts";
 import type { ResolvedShironesPaths } from "./types.ts";
-
-/**
- * Extensions probed when a user override is looked up without one.
- * Order matters: the first hit wins.
- */
-const CONFIG_EXTENSIONS = [".ts", ".mts", ".js", ".mjs"];
-const COMPONENT_EXTENSIONS = [".astro", ".svelte", ".ts", ".js"];
-
-function probe(basePath: string, extensions: string[]): string | null {
-	// Exact path first (the importer already carried an extension).
-	if (extname(basePath) && existsSync(basePath)) return basePath;
-
-	const withoutExt = basePath.replace(/\.(ts|mts|js|mjs|astro|svelte)$/, "");
-	for (const ext of extensions) {
-		const candidate = `${withoutExt}${ext}`;
-		if (existsSync(candidate)) return candidate;
-	}
-	return null;
-}
-
-export interface OverlayTarget {
-	/** Directory inside the package that may be overridden. */
-	packageDir: string;
-	/** Directory in the user's project that takes precedence. */
-	userDir: string;
-	/** Extensions probed when resolving. */
-	extensions: string[];
-	/** Human readable label used in debug logs. */
-	label: string;
-}
-
-/**
- * Build the overlay table describing which package directories can be shadowed
- * by files in the user's project.
- *
- * | package                | user project                  |
- * |------------------------|-------------------------------|
- * | `src/config/*`         | `shirones/config/*`           |
- * | `src/data/*`           | `shirones/config/data/*`      |
- * | `src/components/**`    | `src/components/**`           |
- * | `src/layouts/**`       | `src/layouts/**`              |
- */
-export function createOverlayTargets(paths: ResolvedShironesPaths): OverlayTarget[] {
-	return [
-		{
-			label: "config",
-			packageDir: join(paths.packageSrc, "config"),
-			userDir: paths.configDir,
-			extensions: CONFIG_EXTENSIONS,
-		},
-		{
-			label: "data",
-			packageDir: join(paths.packageSrc, "data"),
-			userDir: paths.dataDir,
-			extensions: CONFIG_EXTENSIONS,
-		},
-		{
-			label: "components",
-			packageDir: join(paths.packageSrc, "components"),
-			userDir: join(paths.projectRoot, "src", "components"),
-			extensions: COMPONENT_EXTENSIONS,
-		},
-		{
-			label: "layouts",
-			packageDir: join(paths.packageSrc, "layouts"),
-			userDir: join(paths.projectRoot, "src", "layouts"),
-			extensions: COMPONENT_EXTENSIONS,
-		},
-	];
-}
-
-/**
- * Resolve a package-internal path to a user override, if one exists.
- * Returns `null` when the path is not overridable or no override is present.
- */
-export function resolveOverride(
-	targets: OverlayTarget[],
-	absolutePath: string,
-): string | null {
-	const normalised = normalisePath(absolutePath);
-
-	for (const target of targets) {
-		const packageDir = normalisePath(target.packageDir);
-		if (!normalised.startsWith(`${packageDir}/`)) continue;
-
-		const rel = relative(target.packageDir, absolutePath);
-		// `index.ts` barrels stay owned by the package: overriding them would
-		// break the named-export contract the theme relies on.
-		if (/^index\.(ts|js|mts|mjs)$/.test(rel)) continue;
-
-		const hit = probe(join(target.userDir, rel), target.extensions);
-		if (hit) return hit;
-	}
-	return null;
-}
 
 export interface OverlayPluginOptions {
 	paths: ResolvedShironesPaths;
 	/** Explicit component override map from `ShironesOptions.components`. */
 	components?: Record<string, string>;
-	/** Emit a line per applied override. */
-	verbose?: boolean;
+	/** Compiled override registry (mutable; the integration rebuilds it in dev). */
+	registryRef: OverrideRegistryRef;
 }
 
 /** Theme path aliases, mapped to sub-directories of the package `src/`. */
@@ -137,10 +48,9 @@ function splitQuery(id: string): [string, string] {
  * and returns `null` for everything else, leaving Vite's resolution untouched.
  */
 export function shironesOverlay(options: OverlayPluginOptions): Plugin {
-	const { paths, components = {}, verbose = false } = options;
+	const { paths, components = {}, registryRef } = options;
 	const targets = createOverlayTargets(paths);
 	const packageSrc = normalisePath(paths.packageSrc);
-	const logged = new Set<string>();
 
 	// Pre-resolve the explicit override map to absolute paths.
 	const explicit = new Map<string, string>();
@@ -185,17 +95,12 @@ export function shironesOverlay(options: OverlayPluginOptions): Plugin {
 	}
 
 	function overrideFor(absolutePath: string): string | null {
-		return explicitOverrideFor(absolutePath) ?? resolveOverride(targets, absolutePath);
-	}
-
-	function report(from: string, to: string): void {
-		if (!verbose || logged.has(from)) return;
-		logged.add(from);
-		console.log(
-			`[shirones] override ${relative(paths.packageSrc, from)} → ${relative(
-				paths.projectRoot,
-				to,
-			)}`,
+		// Explicit config map wins, then the pre-built registry (a single scan
+		// at startup instead of a filesystem probe per import).
+		return (
+			explicitOverrideFor(absolutePath) ??
+			registryRef.overrides.get(overrideKey(absolutePath)) ??
+			null
 		);
 	}
 
@@ -206,30 +111,110 @@ export function shironesOverlay(options: OverlayPluginOptions): Plugin {
 		resolveId(source, importer) {
 			const [sourcePath, query] = splitQuery(source);
 
+			// ── Case 0: absolute path already resolved into the package ─────
+			// Astro expands tsconfig-path aliases (`@components/…`, `@layouts/…`,
+			// `@/…`) into absolute package paths *before* this hook runs, so the
+			// alias string never reaches Case 1. Check the resolved path itself
+			// for a user override.
+			if (isAbsolute(sourcePath)) {
+				const override = overrideFor(sourcePath);
+				if (override) {
+					return `${override}${query}`;
+				}
+			}
+
 			// ── Case 1: theme alias (`@/config/siteConfig`, `@components/…`) ──
 			const aliased = resolveAlias(sourcePath);
 			if (aliased) {
 				const override = overrideFor(aliased);
 				if (override) {
-					report(aliased, override);
 					return `${override}${query}`;
 				}
 				// Not overridden: let `resolve.alias` handle it as usual.
 				return null;
 			}
 
-			// ── Case 2: relative import from a file inside the package ────────
-			if (!importer || !sourcePath.startsWith(".")) return null;
+		// ── Case 2: relative import from a file inside the package ────────
+		if (!importer || !sourcePath.startsWith(".")) return null;
 
-			const [importerPath] = splitQuery(importer);
-			if (!normalisePath(importerPath).startsWith(`${packageSrc}/`)) return null;
-
+		const [importerPath] = splitQuery(importer);
+		const normalisedImporter = normalisePath(importerPath);
+		if (normalisedImporter.startsWith(`${packageSrc}/`)) {
 			const candidate = resolve(dirname(importerPath), sourcePath);
 			const override = overrideFor(candidate);
 			if (!override) return null;
 
-			report(candidate, override);
 			return `${override}${query}`;
-		},
-	};
+		}
+
+		// ── Case 3: relative import from a user override file ─────────────
+		// A mirrored component keeps the theme's own relative imports
+		// (`./PostMeta.astro`, `../../utils/…`). Resolve siblings in the
+		// user's project first; when the user hasn't mirrored them, fall back
+		// to the equivalent file inside the package.
+		const userTarget = targets.find((t) =>
+			normalisedImporter.startsWith(`${normalisePath(t.userDir)}/`),
+		);
+		if (!userTarget) return null;
+
+		const userCandidate = resolve(dirname(importerPath), sourcePath);
+		// A sibling that exists in the user's project is Vite's business.
+		if (probe(userCandidate, userTarget.extensions) || existsSync(userCandidate))
+			return null;
+
+		// Otherwise resolve the equivalent file inside the package — this also
+		// covers non-component files (`.css`, assets) a mirrored file reaches.
+		const rel = relative(userTarget.userDir, userCandidate);
+		const pkgCandidate = join(userTarget.packageDir, rel);
+		const pkgTarget =
+			probe(pkgCandidate, userTarget.extensions) ??
+			(existsSync(pkgCandidate) ? pkgCandidate : null);
+		if (pkgTarget) return `${normalisePath(pkgTarget)}${query}`;
+		return null;
+	},
+
+	load(id) {
+		// User-overridden .astro/.svelte files keep the theme's relative
+		// Stylus imports (`@import "../styles/…"`), which only exist inside
+		// the package. Rewrite them here — in `load` rather than `transform` —
+		// because vite-plugin-astro compiles `<style lang="stylus">` in its own
+		// pre-transform, which runs before this plugin's transform hook.
+		const [path, query] = splitQuery(id);
+		if (query) return null;
+		const normalised = normalisePath(path);
+		if (!/\.(astro|svelte)$/.test(normalised)) return null;
+		const target = targets.find((t) =>
+			normalised.startsWith(`${normalisePath(t.userDir)}/`),
+		);
+		if (!target) return null;
+
+		let code: string;
+		try {
+			code = readFileSync(path, "utf8");
+		} catch {
+			return null;
+		}
+		if (!/@(import|reference|require)\s+["']\.\.?\//.test(code)) return null;
+
+		let changed = false;
+		const out = code.replace(
+			/@(import|reference|require)\s+(["'])(\.\.?\/[^"']+)\2/g,
+			(match, directive, quote, rel) => {
+				// Resolve against the user's project first, so a user can also
+				// override the referenced file; otherwise point at the package's
+				// copy (`.styl` variables, `.css` imports, `@reference` targets).
+				const candidate = resolve(dirname(path), rel);
+				if (existsSync(candidate)) return match;
+				const pkgTarget = join(
+					target.packageDir,
+					relative(target.userDir, candidate),
+				);
+				if (!existsSync(pkgTarget)) return match;
+				changed = true;
+				return `@${directive} ${quote}${normalisePath(pkgTarget)}${quote}`;
+			},
+		);
+		return changed ? { code: out, map: null } : null;
+	},
+};
 }

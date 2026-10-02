@@ -12,6 +12,11 @@ test.describe("Site motion", () => {
 	async function openArchive(page: import("@playwright/test").Page) {
 		await page.goto("/archive/", { waitUntil: "networkidle" });
 		await page.waitForTimeout(600);
+		await page
+			.getByRole("group", { name: "归档分组" })
+			.getByText("按分类", { exact: true })
+			.click();
+		await expect(page.locator(".m3-blog-archive__group").nth(1)).toBeVisible();
 	}
 
 	async function bodyHeight(
@@ -31,7 +36,7 @@ test.describe("Site motion", () => {
 	test("collapses/expands with a height transition", async ({ page }) => {
 		await openArchive(page);
 
-		// 第二个年份默认折叠（0px），点击展开播放动画
+		// 第二个分类默认折叠，点击展开播放动画
 		expect(await bodyHeight(page, 1)).toBe(0);
 		await page.click(
 			".m3-blog-archive__group:nth-child(2) .m3-blog-archive__header",
@@ -50,7 +55,7 @@ test.describe("Site motion", () => {
 			page.locator(
 				".m3-blog-archive__group:nth-child(2) .m3-blog-archive__item",
 			),
-		).toHaveCount(4);
+		).not.toHaveCount(0);
 	});
 
 	test("does not collapse animate on initial render or grouping changes", async ({
@@ -82,13 +87,12 @@ test.describe("Site motion", () => {
 		).toBe(0);
 
 		await page
-			.getByRole("group", { name: "Group archive by" })
-			.getByText("By Category", { exact: true })
+			.getByRole("group", { name: "归档分组" })
+			.getByText("按标签", { exact: true })
 			.click();
-		await expect(page.locator(".m3-blog-archive__group-title")).toHaveText([
-			"Examples",
-			"Guides",
-		]);
+		await expect(
+			page.locator(".m3-blog-archive__group-title").first(),
+		).toHaveText(/^#/);
 		expect(
 			await page.evaluate(
 				() =>
@@ -144,6 +148,10 @@ test.describe("Site motion", () => {
 		).toBe(1);
 
 		await page.reload({ waitUntil: "networkidle" });
+		await page
+			.getByRole("group", { name: "归档分组" })
+			.getByText("按分类", { exact: true })
+			.click();
 		await expect(secondHeader).toHaveAttribute("aria-expanded", "true");
 		expect(await bodyHeight(page, 1)).toBeGreaterThan(0);
 		expect(
@@ -174,7 +182,7 @@ test.describe("Site motion", () => {
 			page.locator(
 				".m3-blog-archive__group:nth-child(2) .m3-blog-archive__item",
 			),
-		).toHaveCount(4);
+		).not.toHaveCount(0);
 	});
 
 	test("toggles aria-expanded and hides content when collapsed", async ({
@@ -294,7 +302,7 @@ test.describe("sidebar pages filter (swup sync)", () => {
 	) {
 		return page.evaluate(() => {
 			const row = [...document.querySelectorAll(".m3-site-stats__row")].find(
-				(element) => element.textContent?.includes("Tags"),
+				(element) => element.textContent?.includes("标签"),
 			);
 			const icon = row?.querySelector(
 				'svg[data-icon="material-symbols:tag-rounded"]',
@@ -367,7 +375,10 @@ test.describe("sidebar pages filter (swup sync)", () => {
 	test("stats tag icon remains self-contained after post to archive navigation", async ({
 		page,
 	}) => {
-		await page.goto("/posts/guide/", { waitUntil: "networkidle" });
+		await page.goto(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+			{ waitUntil: "networkidle" },
+		);
 		expect(await statsWrapperHidden(page)).toBe(true);
 
 		await clickLink(page, '#top-row a[href="/archive/"]');

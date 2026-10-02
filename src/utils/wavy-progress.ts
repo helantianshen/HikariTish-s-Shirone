@@ -224,13 +224,15 @@ export function buildLinearWavePath(
 	height: number,
 	strokeWidth: number,
 	amplitude = 1,
+	startX = 0,
 ): string {
 	const halfWavelength = wavelength / 2;
 	const controlY = (height - strokeWidth) * amplitude;
-	let d = `M 0 ${fmt(height / 2)}`;
-	let anchorX = halfWavelength;
-	let controlX = halfWavelength / 2;
-	let cy = controlY;
+	let d = `M ${fmt(startX)} ${fmt(height / 2)}`;
+	let anchorX = startX + halfWavelength;
+	let controlX = startX + halfWavelength / 2;
+	const halfWavesFromZero = Math.round(startX / halfWavelength);
+	let cy = halfWavesFromZero % 2 === 0 ? controlY : -controlY;
 	while (anchorX <= pathWidth) {
 		d += ` Q ${fmt(controlX)} ${fmt(height / 2 + cy)}, ${fmt(anchorX)} ${fmt(height / 2)}`;
 		anchorX += halfWavelength;

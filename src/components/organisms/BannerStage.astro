@@ -81,16 +81,63 @@ const optimizeBannerImage = async (
 	};
 };
 
-const desktopResponsiveImages = await Promise.all(
-	siteConfig.banner.src.desktop.map((src) =>
-		optimizeBannerImage(src, "desktop"),
-	),
+function normalizeBannerSource(source: unknown, name: string): { light: string[]; dark: string[] } {
+	if (Array.isArray(source)) {
+		const list = source.filter((item): item is string => typeof item === "string");
+		return { light: list, dark: list };
+	}
+	if (typeof source === "object" && source !== null) {
+		const obj = source as Record<string, unknown>;
+		if (!Array.isArray(obj.light) || !Array.isArray(obj.dark)) {
+			throw new Error(
+				`[config] site.banner.src.${name} 对象形式必须同时提供 light 与 dark 数组。若亮暗两色使用相同图片，请直接使用数组形式。`,
+			);
+		}
+		return {
+			light: obj.light.filter((item): item is string => typeof item === "string"),
+			dark: obj.dark.filter((item): item is string => typeof item === "string"),
+		};
+	}
+	return { light: [], dark: [] };
+}
+
+const desktopSource = normalizeBannerSource(siteConfig.banner.src.desktop, "desktop");
+const mobileSource = normalizeBannerSource(siteConfig.banner.src.mobile, "mobile");
+
+// 对图片按路径去重进行优化缓存
+const optimizationCache = new Map<string, Promise<ResponsiveBannerImage>>();
+const getOptimized = (src: string, viewport: "desktop" | "mobile") => {
+	const key = `${viewport}:${src}`;
+	let p = optimizationCache.get(key);
+	if (!p) {
+		p = optimizeBannerImage(src, viewport);
+		optimizationCache.set(key, p);
+	}
+	return p;
+};
+
+const desktopLightResponsive = await Promise.all(
+	desktopSource.light.map((src) => getOptimized(src, "desktop")),
 );
-const mobileResponsiveImages = await Promise.all(
-	siteConfig.banner.src.mobile.map((src) => optimizeBannerImage(src, "mobile")),
+const desktopDarkResponsive = await Promise.all(
+	desktopSource.dark.map((src) => getOptimized(src, "desktop")),
 );
-const desktopImages = desktopResponsiveImages.map(({ fallback }) => fallback);
-const mobileImages = mobileResponsiveImages.map(({ fallback }) => fallback);
+const mobileLightResponsive = await Promise.all(
+	mobileSource.light.map((src) => getOptimized(src, "mobile")),
+);
+const mobileDarkResponsive = await Promise.all(
+	mobileSource.dark.map((src) => getOptimized(src, "mobile")),
+);
+
+const desktopImages = {
+	light: desktopLightResponsive.map(({ fallback }) => fallback),
+	dark: desktopDarkResponsive.map(({ fallback }) => fallback),
+};
+const mobileImages = {
+	light: mobileLightResponsive.map(({ fallback }) => fallback),
+	dark: mobileDarkResponsive.map(({ fallback }) => fallback),
+};
+
 const dimOpacity = Math.min(Math.max(siteConfig.banner.dim.opacity, 0), 1);
 const rawSubtitles = siteConfig.banner.homeText.subtitle;
 const subtitleArray = Array.isArray(rawSubtitles)
@@ -103,11 +150,11 @@ const carouselFadeDuration = Math.min(
 	3000,
 );
 const carouselAnimation = siteConfig.banner.carousel?.animation ?? "ken-burns";
-const initialDesktopSrc = desktopImages[0] ?? "";
-const initialMobileSrc = mobileImages[0] ?? "";
+const initialDesktopSrc = desktopImages.light[0] ?? "";
+const initialMobileSrc = mobileImages.light[0] ?? "";
 const initialSrc = initialDesktopSrc || initialMobileSrc;
-const initialDesktopImage = desktopResponsiveImages[0];
-const initialMobileImage = mobileResponsiveImages[0];
+const initialDesktopImage = desktopLightResponsive[0];
+const initialMobileImage = mobileLightResponsive[0];
 const initialImage = initialDesktopImage ?? initialMobileImage;
 const initialMobileBanner = page === "home";
 ---
@@ -217,14 +264,15 @@ const initialMobileBanner = page === "home";
 		prefersReducedMotion,
 	} from "@utils/motion";
 	import { getStoredWallpaperMode } from "@utils/setting-utils";
-	import { WALLPAPER_MODE_CHANGE_EVENT } from "@constants/constants";
+	import { WALLPAPER_MODE_CHANGE_EVENT, THEME_CHANGE_EVENT } from "@constants/constants";
 	import type { SidebarPage } from "@/types/sidebarConfig";
 
 	interface BannerRuntime {
 		activeGroup: BannerViewport | null;
 		activeIndex: number;
 		activeLayer: 0 | 1;
-		images: Record<BannerViewport, string[]>;
+		images: Record<BannerViewport, { light: string[]; dark: string[] }>;
+		activeTheme: "light" | "dark";
 		preloaded: HTMLImageElement | null;
 		subtitleGeneration: number;
 		subtitlePage: SidebarPage | null;
@@ -236,6 +284,7 @@ const initialMobileBanner = page === "home";
 		navigationSyncFrame: number | null;
 		timer: number | null;
 		layerMotions: [BannerAnimationHandle | null, BannerAnimationHandle | null];
+		carouselMediaPrepared: boolean;
 	}
 
 	declare global {
@@ -266,14 +315,45 @@ const initialMobileBanner = page === "home";
 	const contextDate = stage?.querySelector<HTMLTimeElement>(
 		"[data-banner-context-date]",
 	);
+	function parseThemeImages(value: string | undefined): { light: string[]; dark: string[] } {
+		if (!value) return { light: [], dark: [] };
+		try {
+			const parsed = JSON.parse(value);
+			if (Array.isArray(parsed)) {
+				const list = parsed.filter((item): item is string => typeof item === "string");
+				return { light: list, dark: list };
+			}
+			if (typeof parsed === "object" && parsed !== null) {
+				return {
+					light: Array.isArray(parsed.light) ? parsed.light.filter((i: unknown): i is string => typeof i === "string") : [],
+					dark: Array.isArray(parsed.dark) ? parsed.dark.filter((i: unknown): i is string => typeof i === "string") : [],
+				};
+			}
+			return { light: [], dark: [] };
+		} catch {
+			return { light: [], dark: [] };
+		}
+	}
+
+	function isDarkMode(): boolean {
+		return document.documentElement.classList.contains("dark");
+	}
+
+	function getActiveImages(viewport: BannerViewport): string[] {
+		const store = runtime.images[viewport];
+		const mode = isDarkMode() ? "dark" : "light";
+		return store[mode] ?? [];
+	}
+
 	const runtime: BannerRuntime = {
 		activeGroup: null,
 		activeIndex: 0,
 		activeLayer: 0,
 		images: {
-			desktop: parseImages(stage?.dataset.desktopImages),
-			mobile: parseImages(stage?.dataset.mobileImages),
+			desktop: parseThemeImages(stage?.dataset.desktopImages),
+			mobile: parseThemeImages(stage?.dataset.mobileImages),
 		},
+		activeTheme: isDarkMode() ? "dark" : "light",
 		preloaded: null,
 		subtitleGeneration: 0,
 		subtitlePage: null,
@@ -285,19 +365,8 @@ const initialMobileBanner = page === "home";
 		navigationSyncFrame: null,
 		timer: null,
 		layerMotions: [null, null],
+		carouselMediaPrepared: false,
 	};
-
-	function parseImages(value: string | undefined): string[] {
-		if (!value) return [];
-		try {
-			const parsed = JSON.parse(value);
-			return Array.isArray(parsed)
-				? parsed.filter((item): item is string => typeof item === "string")
-				: [];
-		} catch {
-			return [];
-		}
-	}
 
 	function currentPage(): SidebarPage | undefined {
 		return document.getElementById("swup-container")?.dataset.currentPage as
@@ -536,50 +605,118 @@ const initialMobileBanner = page === "home";
 		runtime.layerMotions[1]?.resume();
 	}
 
-	function showImage(src: string, immediate: boolean) {
-		if (!layers.length) return;
-		const nextLayer = immediate ? runtime.activeLayer : runtime.activeLayer === 0 ? 1 : 0;
-		const next = layers[nextLayer];
-		const previous = layers[runtime.activeLayer];
-		if (next.src !== new URL(src, window.location.href).href) next.src = src;
-		next.style.objectPosition = stage?.dataset.position || "center";
+	// Remove the `<picture><source>` elements after the carousel takes over; otherwise, modifying `src` on the `<img>` tag at runtime will be overridden by the initial `<source>` element
+	function prepareCarouselMedia(images: string[]) {
+		if (runtime.carouselMediaPrepared || !stage || images.length < 2) return;
+		if (stage.dataset.carouselEnabled !== "true") return;
+		stage.querySelectorAll("picture source").forEach((source) => source.remove());
+		runtime.carouselMediaPrepared = true;
+	}
 
+	function resolveImageUrl(src: string): string {
+		return new URL(src, window.location.href).href;
+	}
+
+	function prepareLayerImage(
+		layer: HTMLImageElement,
+		src: string,
+	): Promise<void> {
+		const resolved = resolveImageUrl(src);
+		layer.removeAttribute("srcset");
+		layer.removeAttribute("sizes");
+		layer.style.objectPosition = stage?.dataset.position || "center";
+		if (layer.src === resolved && layer.complete) return Promise.resolve();
+		return new Promise((resolve) => {
+			const finish = () => resolve();
+			layer.addEventListener("load", finish, { once: true });
+			layer.addEventListener("error", finish, { once: true });
+			if (layer.src !== resolved) layer.src = src;
+			if (layer.complete) finish();
+		});
+	}
+
+	function startLayerMotion(layerIndex: 0 | 1, element: HTMLImageElement) {
+		if (prefersReducedMotion()) return;
 		const interval = getCarouselInterval();
 		const fadeDuration = getFadeDuration();
-		const motionDuration = interval + fadeDuration;
-		const preset = getAnimationPreset();
+		runtime.layerMotions[layerIndex]?.cancel();
+		runtime.layerMotions[layerIndex] = playBannerMotion({
+			element,
+			preset: getAnimationPreset(),
+			index: runtime.activeIndex,
+			durationMs: interval + fadeDuration,
+		});
+	}
 
-		runtime.layerMotions[nextLayer]?.cancel();
-		const startMotion = () => {
-			if (runtime.activeLayer !== nextLayer || prefersReducedMotion()) return;
-			runtime.layerMotions[nextLayer]?.cancel();
-			runtime.layerMotions[nextLayer] = playBannerMotion({
-				element: next,
-				preset,
-				index: runtime.activeIndex,
-				durationMs: motionDuration,
-			});
-		};
+	function crossfadeToLayer(nextLayer: 0 | 1) {
+		const next = layers[nextLayer];
+		const previous = layers[runtime.activeLayer];
+		const previousLayer = runtime.activeLayer;
+
+		runtime.layerMotions[previousLayer]?.cancel();
+		runtime.layerMotions[previousLayer] = null;
+
+		next.classList.add("banner-stage__image--fading");
+		previous.classList.add("banner-stage__image--fading");
+		// Force a reflow to ensure the opacity transition interpolates correctly from the current frame
+		void next.offsetWidth;
+		next.classList.add("banner-stage__image--active");
+		previous.classList.remove("banner-stage__image--active");
+
+		runtime.activeLayer = nextLayer;
+		startLayerMotion(nextLayer, next);
+	}
+
+	function applyImmediateLayer(nextLayer: 0 | 1) {
+		const next = layers[nextLayer];
+		for (let i = 0; i < layers.length; i += 1) {
+			if (i !== nextLayer) {
+				layers[i].classList.remove("banner-stage__image--active");
+				layers[i].classList.remove("banner-stage__image--fading");
+				runtime.layerMotions[i]?.cancel();
+				runtime.layerMotions[i] = null;
+			}
+		}
+		next.classList.add("banner-stage__image--active");
+		next.classList.remove("banner-stage__image--fading");
+		runtime.activeLayer = nextLayer;
+	}
+
+	function showImageImmediate(nextLayer: 0 | 1, src: string) {
+		const next = layers[nextLayer];
+		const resolved = resolveImageUrl(src);
+		next.removeAttribute("srcset");
+		next.removeAttribute("sizes");
+		next.style.objectPosition = stage?.dataset.position || "center";
+		if (next.src !== resolved) next.src = src;
+		if (next.complete) {
+			applyImmediateLayer(nextLayer);
+			return;
+		}
+		void prepareLayerImage(next, src).then(() => {
+			if (next.src !== resolved) return;
+			applyImmediateLayer(nextLayer);
+		});
+	}
+
+	function showImage(src: string, immediate: boolean) {
+		if (!layers.length) return;
+		const nextLayer: 0 | 1 = immediate
+			? runtime.activeLayer
+			: runtime.activeLayer === 0
+				? 1
+				: 0;
+		const next = layers[nextLayer];
 
 		if (immediate || prefersReducedMotion()) {
-			for (let i = 0; i < layers.length; i += 1) {
-				if (i !== nextLayer) {
-					layers[i].classList.remove("banner-stage__image--active");
-					layers[i].classList.remove("banner-stage__image--fading");
-					runtime.layerMotions[i]?.cancel();
-					runtime.layerMotions[i] = null;
-				}
-			}
-			next.classList.add("banner-stage__image--active");
-			next.classList.remove("banner-stage__image--fading");
-		} else {
-			next.classList.add("banner-stage__image--active");
-			next.classList.add("banner-stage__image--fading");
-			previous.classList.remove("banner-stage__image--active");
-			previous.classList.add("banner-stage__image--fading");
+			showImageImmediate(nextLayer, src);
+			return;
 		}
-		runtime.activeLayer = nextLayer;
-		if (!immediate) startMotion();
+
+		void prepareLayerImage(next, src).then(() => {
+			if (next.src !== resolveImageUrl(src)) return;
+			crossfadeToLayer(nextLayer);
+		});
 	}
 
 	function scheduleRotation(images: string[]) {
@@ -742,7 +879,11 @@ const initialMobileBanner = page === "home";
 	function syncBanner(pageOverride?: SidebarPage, contextOverride?: BannerContext) {
 		if (!stage) return;
 		const viewport = currentViewport();
-		const images = runtime.images[viewport];
+		const images = getActiveImages(viewport);
+		const currentTheme = isDarkMode() ? "dark" : "light";
+		const themeChanged = runtime.activeTheme !== currentTheme;
+		runtime.activeTheme = currentTheme;
+
 		const page = pageOverride ?? currentPage();
 		const state = resolveBannerState({
 			mode: getStoredWallpaperMode(),
@@ -777,7 +918,9 @@ const initialMobileBanner = page === "home";
 			return;
 		}
 
-		if (runtime.activeGroup !== state.assetGroup) {
+		prepareCarouselMedia(images);
+
+		if (runtime.activeGroup !== state.assetGroup || themeChanged) {
 			runtime.activeGroup = state.assetGroup;
 			runtime.activeIndex = 0;
 			showImage(images[0], true);
@@ -805,6 +948,7 @@ const initialMobileBanner = page === "home";
 		if (!window.__shironeBannerBound) {
 			window.__shironeBannerBound = true;
 			window.addEventListener(WALLPAPER_MODE_CHANGE_EVENT, () => syncBanner());
+			window.addEventListener(THEME_CHANGE_EVENT, () => syncBanner());
 			window.addEventListener("resize", () => {
 				if (currentViewport() === "desktop" && stage?.hidden === false) {
 					scheduleContextTitleFit();

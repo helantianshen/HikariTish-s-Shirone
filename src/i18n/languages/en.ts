@@ -1,5 +1,5 @@
-import Key from "../i18nKey";
-import type { Translation } from "../translation";
+import Key from "../i18nKey-runtime.mjs";
+import type { Translation } from "../translation.ts";
 
 export const en: Translation = {
 	[Key.home]: "Home",
@@ -91,6 +91,22 @@ export const en: Translation = {
 	[Key.devicesViewSpecs]: "View details",
 	[Key.devicesFeatured]: "Featured",
 
+	[Key.games]: "Games",
+	[Key.gamesBanner]:
+		"Games I play — capsule art, ratings, playtime and short reviews.",
+	[Key.gamesCounts]: "games",
+	[Key.gamesNoResults]: "No games matched your filters",
+	[Key.gamesSearchPlaceholder]: "Search by title, developer, or genre...",
+	[Key.gamesCategoryLabel]: "Game categories",
+	[Key.gamesStatusPlaying]: "Playing",
+	[Key.gamesStatusCompleted]: "Completed",
+	[Key.gamesStatusBacklog]: "Backlog",
+	[Key.gamesStatusWishlist]: "Wishlist",
+	[Key.gamesViewDetails]: "Store page",
+	[Key.gamesFeatured]: "Featured",
+	[Key.gamesHours]: "hrs",
+	[Key.gamesRating]: "Rating",
+
 	[Key.timeline]: "Timeline",
 	[Key.timelineBanner]: "Growth trajectory, milestones, and memorable moments.",
 	[Key.timelineCounts]: "milestones",
@@ -137,11 +153,26 @@ export const en: Translation = {
 
 	[Key.tags]: "Tags",
 	[Key.categories]: "Categories",
+	[Key.series]: "Series",
+	[Key.seriesCount]: "series",
+	[Key.seriesCounts]: "series",
+	[Key.seriesStatusOngoing]: "Ongoing",
+	[Key.seriesStatusCompleted]: "Completed",
+	[Key.seriesPartOf]: "This post is part of the series",
+	[Key.seriesPart]: "Part {index} of {total}",
+	[Key.seriesPrevInSeries]: "Previous in series",
+	[Key.seriesNextInSeries]: "Next in series",
+	[Key.seriesViewAll]: "View all series",
 	[Key.recentPosts]: "Recent Posts",
 	[Key.tableOfContents]: "Table of Contents",
 	[Key.formulaScrollable]: "Horizontally scrollable formula",
+	[Key.fieldRequired]: "Required",
+	[Key.fieldOptional]: "Optional",
+	[Key.fieldDeprecated]: "Deprecated",
 	[Key.codeBlockExpand]: "Expand code block",
 	[Key.codeBlockCollapse]: "Collapse code block",
+	[Key.codeTreeExpand]: "Expand code tree",
+	[Key.codeTreeCollapse]: "Collapse code tree",
 	[Key.announcement]: "Announcement",
 	[Key.announcementClose]: "Close Announcement",
 
@@ -208,6 +239,7 @@ export const en: Translation = {
 	[Key.musicHidePlaylist]: "Hide playlist",
 	[Key.musicEmpty]: "No tracks in the playlist",
 	[Key.musicLoading]: "Loading music...",
+	[Key.musicNotRequested]: "Not requested yet",
 	[Key.musicNowPlaying]: "Now playing: {title}",
 	[Key.musicErrorEmptyPlaylist]: "The playlist is empty.",
 	[Key.musicErrorSourceUnavailable]: "This track is unavailable.",
@@ -255,7 +287,9 @@ export const en: Translation = {
 	[Key.randomReadingSubtitle]: "A consistent pick from other articles",
 	[Key.copySuccess]: "Copied to clipboard",
 	[Key.copyLink]: "Copy link",
+	[Key.copySelection]: "Copy",
 	[Key.copyFailed]: "Failed to copy link. Please copy manually.",
+	[Key.sharePageLink]: "Share page link",
 
 	[Key.shareArticle]: "Share Article",
 	[Key.shareArticleDescription]:
@@ -268,6 +302,10 @@ export const en: Translation = {
 	[Key.retry]: "Retry",
 	[Key.backToTop]: "Back to top",
 	[Key.backToComment]: "Scroll to comments",
+	[Key.notFound]: "404",
+	[Key.notFoundTitle]: "This page wandered off",
+	[Key.notFoundDescription]:
+		"Maybe it was moved, archived, or never existed in the first place.",
 	[Key.backToHome]: "Back to home",
 	[Key.close]: "Close",
 	[Key.scanToRead]: "Scan to read article",

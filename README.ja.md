@@ -1,16 +1,16 @@
 <div align="center">
 
+<img src="./public/logo/icon.webp" width="88" height="88" alt="Shirone ロゴ" />
+
 # Shirone
 
-<sub>✦ 言葉に色を。ページをめくるたびに、小さな魔法を。✦</sub>
+**Material 3 Expressive を基盤とした、表現豊かなアニメ風ブログテーマ。**
 
-Material 3 を基盤とした、表現豊かなアニメ風ブログテーマ。
+長文の執筆や個人コレクション、サイトを自分らしくする細部のための、落ち着いた読書空間です。
 
-[matsuzaka-yuki](https://github.com/matsuzaka-yuki) が心を込めて制作しています
+[デモ](https://shirone.mysqil.com/) · [ドキュメント](https://docs.shirone.mysqil.com/) · [問題を報告](https://github.com/LyraVoid/Shirone/issues)
 
-[デモ](https://shirone.mysqil.com/) · [ドキュメント](./docs/) · [問題を報告](https://github.com/LyraVoid/Shirone/issues)
-
-[English](./README.md) | [简体中文](./README.zh-CN.md) | [繁體中文](./README.zh-TW.md) | [日本語](./README.ja.md)
+[English](./README.md) · [简体中文](./README.zh-CN.md) · [繁體中文](./README.zh-TW.md) · [日本語](./README.ja.md)
 
 ![Node.js >= 22.12](https://img.shields.io/badge/Node.js-%3E%3D22.12-5FA04E?logo=nodedotjs&logoColor=white)
 ![pnpm 9](https://img.shields.io/badge/pnpm-9-F69220?logo=pnpm&logoColor=white)
@@ -18,6 +18,19 @@ Material 3 を基盤とした、表現豊かなアニメ風ブログテーマ。
 [![License: MIT](https://img.shields.io/badge/License-MIT-3DA639.svg)](./LICENSE)
 
 </div>
+
+> [!IMPORTANT]
+> **まず[オンラインドキュメント](https://docs.shirone.mysqil.com/)を参照してください。** テーマ設定、コンテンツ運用、デプロイの主要な入口です。
+
+## ここから始める
+
+[オンラインドキュメント](https://docs.shirone.mysqil.com/)が、テーマ設定、コンテンツ管理、デプロイの入口です。このリポジトリにはテーマ本体が含まれています。テーマ本体を追いかける運用が負担になる場合は、[`shirones` npm パッケージ](#npm-パッケージを使う)を使う方法もあります。ブログは小さなリポジトリひとつで済み、テーマの更新は `pnpm add shirones@latest` で取り込めます。個人コンテンツを分離して管理する場合は [Shirone-Content](https://github.com/LyraVoid/Shirone-Content) を利用してください。
+
+## 実測パフォーマンス
+
+現在のリファレンス計測では、Performance、Accessibility、Best Practices、SEO がすべて 100、Agentic browsing も 3/3 でした。詳細なパフォーマンス指標も今回の計測では 100 です。実際の結果はホスティング環境、コンテンツ、ネットワーク条件によって変わります。
+
+![Shirone パフォーマンスベンチマーク](./Benchmark.webp)
 
 ![Shirone のホームページ](./public/assets/projects/shirone.webp)
 
@@ -32,16 +45,13 @@ Material 3 を基盤とした、表現豊かなアニメ風ブログテーマ。
   </tr>
 </table>
 
-> [!IMPORTANT]
-> Shirone は現在アルファ版です。最初の安定版がリリースされるまで、設定やコンポーネント API が変更される場合があります。
-
 ## ✦ すべての物語に、小さな魔法を
 
 Shirone は Astro 7、Svelte 5、Tailwind CSS 4、Stylus で構築された静的な個人ブログテーマです。ここでいう魔法は、華やかな演出を重ねることではありません。光や気分に寄り添って変わる色、空気を途切れさせないページ遷移、そして自分だけの小さな居場所を少しずつ息づかせる細部に宿ります。
 
 その柔らかな表情を支えるのは、デザイントークンで駆動する Material 3 Expressive コンポーネントシステムです。コンテンツは SSR を優先して出力し、Swup による滑らかなサイト内遷移ではページの外側にあるアプリケーションシェルが維持されます。
 
-長文記事だけでなく、モーメント、アルバム、アニメの視聴記録、リンク、プロジェクト、スキル、タイムラインなどの個人コンテンツも掲載できます。
+長文記事だけでなく、モーメント、アルバム、アニメの視聴記録、リンク、プロジェクト、スキル、デバイス、ゲーム、連載シリーズ、タイムラインなどの個人コンテンツも掲載できます。
 
 ## ✦ 魔導書に込めたもの
 
@@ -52,12 +62,14 @@ Shirone は Astro 7、Svelte 5、Tailwind CSS 4、Stylus で構築された静�
 - Markdown / MDX、数式、Mermaid、注釈ブロック、拡張コードブロック、画像ギャラリー
 - Pagefind による全文検索、RSS、Sitemap
 - 目次、関連記事、共有、記事暗号化、任意のコメント機能
-- アーカイブ、カテゴリー、タグ、リンク、モーメント、アニメ、アルバム、プロジェクト、スキル、タイムラインの各ページ
+- アーカイブ、カテゴリー、タグ、リンク、モーメント、アニメ、アルバム、プロジェクト、スキル、デバイス、ゲーム、シリーズ、タイムラインの各ページ
 - 10 種類の UI 言語を内蔵
 - SSR 優先、キーボード操作への配慮、アクセシビリティテスト
 - 任意機能はゼロ負担を原則とし、無効時には外部リクエスト、DOM、レイアウトシフト、メインバンドルへのコード追加が発生しません
 
 ## クイックスタート
+
+テーマの更新に追われたくない場合や、テーマ用のリポジトリを別途持ちたくない場合は、npm パッケージのほうが手軽です。[npm パッケージを使う](#npm-パッケージを使う)を参照してください。
 
 ### 必要な環境
 
@@ -78,6 +90,19 @@ pnpm dev
 
 Windows PowerShell の実行ポリシーでスクリプトがブロックされる場合は、`pnpm.cmd` と `npx.cmd` を使用してください。
 
+### npm パッケージを使う
+
+テーマのリポジトリをクローンしたくない場合は、`shirones` npm パッケージとしてインストールし、空のフォルダーからブログを初期化できます。Astro スターターも手動の依存関係インストールも不要です。
+
+```bash
+mkdir my-blog
+cd my-blog
+npx shirones init   # package.json を書き、astro・テーマ・peer 依存をインストール
+pnpm dev
+```
+
+`init` は `astro.config.mjs`、`shirones/` 配下の型付き設定、サンプルコンテンツと静的アセットを生成します。`src/components/` と `src/layouts/` でテーマのコンポーネントを上書きすることもできます。いつでも `npx shirones init` を再実行して差分を確認できます（報告のみで何も変更しません）。`npx shirones init --update` で不足ファイルを復元し、`--force` でテンプレートから再初期化します。詳しくは [shirones wiki](https://github.com/yCENzh/shirones/wiki)、[npm パッケージモード](./docs/npm-package-mode.md) と [shirones リポジトリ](https://github.com/yCENzh/shirones) を参照してください。
+
 ### サイトをカスタマイズする
 
 1. `src/config/siteConfig.ts` で公開 URL、タイトル、言語、テーマ、バナー、表示設定を変更します。
@@ -95,7 +120,7 @@ Shirone ではテーマのソースコード、個人サイトのコンテンツ
 | リポジトリ | 用途 | 内容 |
 | --- | --- | --- |
 | [Shirone-Content](https://github.com/LyraVoid/Shirone-Content) | 外部コンテンツを使う二つのリポジトリ構成のブログ | 記事、モーメント、データ、メディア、`config/*.yaml` オーバーレイのためのコンテンツテンプレートです。Fork または clone して自分のリポジトリ（通常は非公開）に置き、このテーマリポジトリから参照します。[コンテンツ分離ガイド](./docs/content-separation/README.md)を参照してください。 |
-| [Shirone-NPM](https://github.com/LyraVoid/Shirone-NPM) | `shirones` npm パッケージの保守と公開 | 手動のビルド・公開パイプラインです。ビルド時にこのリポジトリを取得し、テーマのソースコードは意図的に保存しません。通常のブログ利用者は `shirones` をインストールすればよく、このリポジトリを直接使う必要はありません。[npm パッケージモード](./docs/npm-package-mode.md)を参照してください。 |
+| [shirones](https://github.com/yCENzh/shirones) | `shirones` npm パッケージの保守と公開 | 手動のビルド・公開パイプラインです。ビルド時にこのリポジトリを取得し、テーマのソースコードは意図的に保存しません。通常のブログ利用者は `shirones` をインストールすればよく、このリポジトリを直接使う必要はありません。[npm パッケージモード](./docs/npm-package-mode.md)を参照してください。 |
 
 ## 主な設定ファイル
 
@@ -162,6 +187,7 @@ pnpm build
 
 ## ドキュメント
 
+- [shirones wiki](https://github.com/yCENzh/shirones/wiki) - ユーザー向けガイド：インストール、設定、コンテンツ、コンポーネントの上書き、CLI、トラブルシューティング
 - [`src/config/README.md`](./src/config/README.md) - 設定リファレンス
 - [`docs/m3e-standard.md`](./docs/m3e-standard.md) - デザイントークンとコンポーネント標準
 - [`docs/atomic-structure.md`](./docs/atomic-structure.md) - コンポーネント階層と依存ルール

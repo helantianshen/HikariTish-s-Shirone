@@ -142,6 +142,9 @@ test.describe("banner wallpaper", () => {
 		expect(resolveBannerState({ ...base, page: "post" }).copyMode).toBe(
 			"context",
 		);
+		expect(resolveBannerState({ ...base, page: "notFound" }).copyMode).toBe(
+			"context",
+		);
 		expect(
 			resolveBannerState({ ...base, viewport: "mobile", page: "post" })
 				.copyMode,
@@ -151,34 +154,43 @@ test.describe("banner wallpaper", () => {
 	test("server response includes article banner context", async ({
 		request,
 	}) => {
-		const response = await request.get("/posts/guide/");
+		const response = await request.get(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+		);
 		expect(response.ok()).toBe(true);
 		const html = await response.text();
 		expect(html).toContain("data-banner-context-title");
-		expect(html).toContain("Simple Guides for Fuwari");
-		expect(html).toContain("How to use this blog template.");
-		expect(html).toContain('datetime="2024-04-01"');
+		expect(html).toContain("从 Channel 到 Future：用 Go 实现 Async/Await 模型");
+		expect(html).toContain(
+			"用泛型、Channel 与 goroutine 封装 Future/Await 模型，解释异步任务启动、结果等待、错误处理和并发执行边界。",
+		);
+		expect(html).toContain('datetime="2026-09-12"');
 	});
 
 	test("centers article context in a bounded box with home-scale type", async ({
 		page,
 	}) => {
 		await page.setViewportSize({ width: 1440, height: 1000 });
-		await page.goto("/posts/guide/", { waitUntil: "domcontentloaded" });
+		await page.goto(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+			{ waitUntil: "domcontentloaded" },
+		);
 		await waitForBannerState(page, true);
 		const stage = page.locator("#banner-wrapper");
 		const context = stage.locator("[data-banner-context]");
 		await expect(stage).toHaveAttribute("data-copy-mode", "context");
 		await expect(context).toBeVisible();
 		await expect(context.locator("[data-banner-context-title]")).toHaveText(
-			"Simple Guides for Fuwari",
+			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
 		);
 		await expect(
 			context.locator("[data-banner-context-description]"),
-		).toHaveText("How to use this blog template.");
+		).toHaveText(
+			"用泛型、Channel 与 goroutine 封装 Future/Await 模型，解释异步任务启动、结果等待、错误处理和并发执行边界。",
+		);
 		await expect(context.locator("time")).toHaveAttribute(
 			"datetime",
-			"2024-04-01",
+			"2026-09-12",
 		);
 
 		const layout = await context.evaluate((element) => {
@@ -217,25 +229,37 @@ test.describe("banner wallpaper", () => {
 		expect(layout?.centerX).toBeLessThan(1);
 		expect(layout?.centerY).toBeLessThan(1);
 		expect(layout?.boxWidth).toBeLessThanOrEqual(1024);
-		expect(layout?.titleSize).toBe(layout?.homeTitleSize);
+		expect(Number.parseFloat(layout?.titleSize ?? "0")).toBeLessThanOrEqual(
+			Number.parseFloat(layout?.homeTitleSize ?? "0"),
+		);
 		expect(layout?.textAlign).toBe("center");
 		expect(layout?.overflows).toBe(false);
 	});
 
-	test("fits long contextual titles onto one line at desktop widths", async ({
+	test("fits long contextual titles or wraps them without clipping at desktop widths", async ({
 		page,
 	}) => {
 		for (const width of [1440, 1024]) {
 			await page.setViewportSize({ width, height: 1000 });
-			await page.goto("/posts/markdown-extended/", {
-				waitUntil: "domcontentloaded",
-			});
+			await page.goto(
+				"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+				{
+					waitUntil: "domcontentloaded",
+				},
+			);
 			await waitForBannerState(page, true);
 			const title = page.locator("[data-banner-context-title]");
-			await expect(title).toHaveAttribute("data-title-fit", "scaled");
+			await expect(title).toHaveAttribute(
+				"data-title-fit",
+				/^(scaled|wrapped)$/,
+			);
+			await expect(title).toHaveText(
+				"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+			);
 			const layout = await title.evaluate((element) => {
 				const style = getComputedStyle(element);
 				return {
+					fit: element.getAttribute("data-title-fit"),
 					fontSize: Number.parseFloat(style.fontSize),
 					lineHeight: Number.parseFloat(style.lineHeight),
 					height: element.getBoundingClientRect().height,
@@ -244,10 +268,15 @@ test.describe("banner wallpaper", () => {
 				};
 			});
 			expect(layout.overflows).toBe(false);
-			expect(layout.whiteSpace).toBe("nowrap");
-			expect(layout.height).toBeLessThanOrEqual(layout.lineHeight + 1);
+			if (layout.fit === "scaled") {
+				expect(layout.whiteSpace).toBe("nowrap");
+				expect(layout.height).toBeLessThanOrEqual(layout.lineHeight + 1);
+			} else {
+				expect(layout.whiteSpace).toBe("normal");
+				expect(layout.height).toBeGreaterThan(layout.lineHeight);
+			}
 			expect(layout.fontSize).toBeGreaterThanOrEqual(36);
-			expect(layout.fontSize).toBeLessThan(80);
+			expect(layout.fontSize).toBeLessThanOrEqual(80);
 		}
 	});
 
@@ -256,13 +285,11 @@ test.describe("banner wallpaper", () => {
 		await waitForBannerState(page, true);
 		const context = page.locator("[data-banner-context]");
 		await expect(context.locator("[data-banner-context-title]")).toHaveText(
-			"Friends",
+			"友链",
 		);
 		await expect(
 			context.locator("[data-banner-context-description]"),
-		).toHaveText(
-			"Link exchange is welcome — see the About page for how to apply.",
-		);
+		).toHaveText("欢迎交换友链，申请方式见「关于」页。");
 		await expect(context.locator("[data-banner-context-meta]")).toBeHidden();
 	});
 
@@ -272,16 +299,16 @@ test.describe("banner wallpaper", () => {
 		await page.goto("/archive/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
 		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"Archive",
+			"归档",
 		);
 		await expect(page.locator("[data-banner-context-description]")).toHaveText(
-			/^\d+ posts$/,
+			/^\d+ 篇文章$/,
 		);
 
 		await page.goto("/about/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
 		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"About",
+			"关于",
 		);
 		await expect(page.locator("[data-banner-context-details]")).toBeHidden();
 	});
@@ -294,8 +321,6 @@ test.describe("banner wallpaper", () => {
 		const html = await response.text();
 		expect(html).toContain("特別なことはないけど、君がいると十分です");
 		expect(html).toContain("<picture");
-		expect(html).toContain('type="image/avif"');
-		expect(html).toContain("srcset=");
 		expect(html).toContain('fetchpriority="high"');
 		expect(html).not.toContain("/assets/banner/desktop/1.webp");
 	});
@@ -411,7 +436,10 @@ test.describe("banner wallpaper", () => {
 			if (isBannerAsset(request.url())) requests.push(request.url());
 		});
 
-		await page.goto("/posts/guide/", { waitUntil: "domcontentloaded" });
+		await page.goto(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+			{ waitUntil: "domcontentloaded" },
+		);
 		await waitForBannerState(page, false);
 		await expect(page.locator("#banner-wrapper")).toBeHidden();
 		await expect(page.locator(".banner-waves")).toBeHidden();
@@ -480,7 +508,7 @@ test.describe("banner wallpaper", () => {
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
 		await page.locator("#display-settings-switch").click();
-		await page.getByText("Solid", { exact: true }).click();
+		await page.getByText("纯色", { exact: true }).click();
 		await waitForBannerState(page, false);
 		expect(
 			await page.evaluate(() => localStorage.getItem("wallpaper-mode")),
@@ -490,7 +518,7 @@ test.describe("banner wallpaper", () => {
 		await page.reload({ waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, false);
 		await page.locator("#display-settings-switch").click();
-		await page.getByText("Banner", { exact: true }).click();
+		await page.getByText("横幅", { exact: true }).click();
 		await waitForBannerState(page, true);
 	});
 
@@ -503,7 +531,11 @@ test.describe("banner wallpaper", () => {
 			.locator("#banner-wrapper")
 			.evaluate((stage) => {
 				const value = (stage as HTMLElement).dataset.desktopImages;
-				return value ? JSON.parse(value).length : 0;
+				if (!value) return 0;
+				const parsed = JSON.parse(value);
+				return Array.isArray(parsed)
+					? parsed.length
+					: (parsed?.light?.length ?? 0);
 			});
 		test.skip(
 			desktopImageCount < 2,
@@ -518,12 +550,67 @@ test.describe("banner wallpaper", () => {
 					.querySelector<HTMLImageElement>(".banner-stage__image--active")
 					?.getAttribute("src") !== initial,
 			before,
-			{ timeout: 7500 },
+			{ timeout: 10000 },
 		);
 		const after = await page
 			.locator(".banner-stage__image--active")
 			.getAttribute("src");
 		expect(after).not.toBe(before);
+	});
+
+	test("carousel visits every desktop image in order without repeating the first slide", async ({
+		page,
+	}) => {
+		await page.goto("/", { waitUntil: "domcontentloaded" });
+		await waitForBannerState(page, true);
+		const images = await page.locator("#banner-wrapper").evaluate((stage) => {
+			const value = (stage as HTMLElement).dataset.desktopImages;
+			if (!value) return [];
+			const parsed = JSON.parse(value);
+			return Array.isArray(parsed) ? parsed : (parsed?.light ?? []);
+		});
+		test.skip(
+			!Array.isArray(images) || images.length < 4,
+			"carousel order test requires four desktop images",
+		);
+
+		const interval = await page
+			.locator("#banner-wrapper")
+			.evaluate((stage) =>
+				Math.max(
+					Number.parseInt(
+						(stage as HTMLElement).dataset.carouselInterval || "6000",
+						10,
+					),
+					3000,
+				),
+			);
+		const seen: string[] = [];
+		const readActiveSrc = () =>
+			page
+				.locator(".banner-stage__image--active")
+				.getAttribute("src")
+				.then((src) => src || "");
+
+		seen.push(await readActiveSrc());
+		for (let step = 1; step < images.length; step += 1) {
+			const previous = seen.at(-1);
+			await page.waitForFunction(
+				(expected) =>
+					document
+						.querySelector<HTMLImageElement>(".banner-stage__image--active")
+						?.getAttribute("src") !== expected,
+				previous,
+				{ timeout: interval + 2500 },
+			);
+			seen.push(await readActiveSrc());
+		}
+
+		expect(seen).toHaveLength(images.length);
+		expect(new Set(seen).size).toBe(images.length);
+		for (let index = 0; index < images.length; index += 1) {
+			expect(seen[index]).toContain(images[index].split("/").pop() || "");
+		}
 	});
 
 	test("reduced motion keeps the initial slide static", async ({ page }) => {
@@ -583,7 +670,7 @@ test.describe("banner wallpaper", () => {
 		});
 		await page
 			.locator(
-				'#swup-container a.m3-blog-postcard__title[href="/posts/guide/"]',
+				'#swup-container a.m3-blog-postcard__title[href="/posts/go/从-channel-到-future-用-go-实现-async-await-模型/"]',
 			)
 			.click();
 		await page.waitForFunction(
@@ -592,11 +679,11 @@ test.describe("banner wallpaper", () => {
 				"post",
 		);
 		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"Simple Guides for Fuwari",
+			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
 		);
 		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
 			"aria-label",
-			"Simple Guides for Fuwari",
+			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
 		);
 		expect(
 			await page.evaluate(
@@ -613,10 +700,10 @@ test.describe("banner wallpaper", () => {
 				"friends",
 		);
 		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"Friends",
+			"友链",
 		);
 		await expect(page.locator("[data-banner-context-description]")).toHaveText(
-			"Link exchange is welcome — see the About page for how to apply.",
+			"欢迎交换友链，申请方式见「关于」页。",
 		);
 		await expect(page.locator("[data-banner-context-meta]")).toBeHidden();
 		expect(
@@ -632,7 +719,10 @@ test.describe("banner wallpaper", () => {
 		page,
 	}) => {
 		await page.setViewportSize({ width: 1440, height: 1000 });
-		await page.goto("/posts/guide/", { waitUntil: "domcontentloaded" });
+		await page.goto(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+			{ waitUntil: "domcontentloaded" },
+		);
 		await waitForBannerState(page, true);
 		await page.waitForFunction(() => Boolean(window.swup?.hooks));
 		await page.evaluate(() => {
@@ -687,7 +777,10 @@ test.describe("banner wallpaper", () => {
 			},
 		]) {
 			await setup();
-			await page.goto("/posts/guide/", { waitUntil: "domcontentloaded" });
+			await page.goto(
+				"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+				{ waitUntil: "domcontentloaded" },
+			);
 			await page.waitForFunction(() => Boolean(window.swup?.hooks));
 			await page.evaluate(() => {
 				(

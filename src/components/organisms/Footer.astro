@@ -8,6 +8,7 @@ import * as path from "node:path";
 import FooterBar from "@components/atoms/blog/FooterBar.astro";
 import { url } from "@utils/url-utils";
 import { footerConfig, profileConfig } from "@/config";
+import packageMetadata from "../../../package.json";
 
 const currentYear = new Date().getFullYear();
 const links = [
@@ -15,6 +16,7 @@ const links = [
 	{ label: "Atom", href: url("atom/") },
 	{ label: "Sitemap", href: url("sitemap-index.xml"), external: true },
 ];
+const isShironesPackage = packageMetadata.name === "shirones";
 const poweredBy = [
 	{ label: "Astro", href: "https://astro.build", external: true },
 	{
@@ -22,6 +24,15 @@ const poweredBy = [
 		href: "https://github.com/LyraVoid/Shirone",
 		external: true,
 	},
+	...(isShironesPackage
+		? [
+				{
+					label: "shirones",
+					href: "https://github.com/yCENzh/shirones",
+					external: true,
+				},
+			]
+		: []),
 ];
 
 let customFooterHtml = "";
@@ -51,5 +62,7 @@ if (footerConfig.enable) {
 	year={currentYear}
 	links={links}
 	poweredBy={poweredBy}
+	version={packageMetadata.version}
+	versionHref={isShironesPackage ? "https://www.npmjs.com/package/shirones" : "https://github.com/LyraVoid/Shirone"}
 	customHtml={customFooterHtml}
 />

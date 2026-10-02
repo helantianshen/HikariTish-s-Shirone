@@ -30,6 +30,7 @@ interface Labels {
 	hidePlaylist: string;
 	empty: string;
 	loading: string;
+	notRequested: string;
 	nowPlaying: string;
 	errors: Record<MusicErrorCode, string>;
 }
@@ -41,22 +42,25 @@ interface Props {
 
 let { options, labels }: Props = $props();
 let runtime = $state<MusicRuntime | null>(null);
+const hasInitialTracks = options.playlist.length > 0;
+const hasMeting =
+	(options.provider === "meting" || options.provider === "mixed") &&
+	Boolean(options.meting?.id);
+
 let snapshot = $state<MusicSnapshot>({
 	playlist: options.playlist,
-	currentIndex: options.playlist.length > 0 ? 0 : -1,
+	currentIndex: hasInitialTracks ? 0 : -1,
 	currentTrack: options.playlist[0] ?? null,
-	status: options.provider === "meting" ? "loading" : "idle",
+	status: "idle",
 	currentTime: 0,
 	duration: options.playlist[0]?.duration ?? 0,
 	volume: options.defaultVolume,
 	muted: false,
 	mode: options.defaultMode,
-	error:
-		options.playlist.length > 0 || options.provider === "meting"
-			? null
-			: "empty-playlist",
+	error: hasInitialTracks || hasMeting ? null : "empty-playlist",
 });
 let playlistOpen = $state(false);
+let playerEl = $state<HTMLElement | null>(null);
 const playlistId = "sidebar-music-playlist";
 
 const modeLabels: Record<PlaybackMode, string> = {
@@ -73,8 +77,21 @@ const modeIcons: Record<PlaybackMode, string> = {
 const playing = $derived(snapshot.status === "playing");
 const loading = $derived(snapshot.status === "loading");
 const hasTracks = $derived(snapshot.playlist.length > 0);
+// meting 源配置了但尚未发起过请求：此时既不是「正在加载」也不是「歌单为空」，
+// 显示「尚未请求」占位，不能把「尚未请求」谎报成「正在加载」（见 issue #58）。
+const notYetRequested = $derived(
+	hasMeting &&
+		!hasTracks &&
+		snapshot.status === "idle" &&
+		snapshot.error === null,
+);
 const currentTitle = $derived(
-	snapshot.currentTrack?.title ?? (loading ? labels.loading : labels.empty),
+	snapshot.currentTrack?.title ??
+		(loading
+			? labels.loading
+			: notYetRequested
+				? labels.notRequested
+				: labels.empty),
 );
 const currentArtist = $derived(
 	snapshot.currentTrack?.artist ?? (loading ? "..." : "—"),
@@ -116,15 +133,41 @@ const liveMessage = $derived.by(() => {
 onMount(() => {
 	let unsubscribe = () => {};
 	let active = true;
+	let viewportObserver: IntersectionObserver | null = null;
 	void import("@utils/music").then(({ getMusicRuntime }) => {
 		if (!active) return;
 		runtime = getMusicRuntime(options);
 		unsubscribe = runtime.subscribe((next) => {
 			snapshot = next;
 		});
+		// preload: "metadata" —— 组件进入视口时预取歌单元数据（仅元信息，不预取音频）。
+		// 未配置/配置 "none" 时保持按需：等用户播放或展开播放列表才请求。
+		if (
+			hasMeting &&
+			!hasInitialTracks &&
+			options.meting?.preload === "metadata" &&
+			playerEl &&
+			typeof IntersectionObserver !== "undefined"
+		) {
+			viewportObserver = new IntersectionObserver(
+				(entries) => {
+					for (const entry of entries) {
+						if (entry.isIntersecting) {
+							viewportObserver?.disconnect();
+							viewportObserver = null;
+							void runtime?.initialize();
+						}
+					}
+				},
+				{ rootMargin: "0px", threshold: 0 },
+			);
+			viewportObserver.observe(playerEl);
+		}
 	});
 	return () => {
 		active = false;
+		viewportObserver?.disconnect();
+		viewportObserver = null;
 		unsubscribe();
 	};
 });
@@ -179,7 +222,7 @@ function setVolume(event: Event): void {
 }
 </script>
 
-	<div class="music-player" data-music-player>
+	<div class="music-player" data-music-player bind:this={playerEl}>
 		<div class="music-player__track">
 			<div class={`music-player__cover${playing ? " music-player__cover--playing" : ""}`}>
 				{#if snapshot.currentTrack?.cover}
@@ -293,7 +336,7 @@ function setVolume(event: Event): void {
 					size="medium"
 					toggle
 					checked={playing}
-					disabled={!hasTracks && options.provider !== "meting"}
+					disabled={!hasTracks && !hasMeting}
 					onclick={() => void runtime?.toggle()}
 				/>
 			</Tooltip>
@@ -314,7 +357,7 @@ function setVolume(event: Event): void {
 					class="music-player__playlist-toggle"
 					ariaExpanded={playlistOpen}
 					ariaControls={playlistId}
-					disabled={!hasTracks && options.provider !== "meting"}
+					disabled={!hasTracks && !hasMeting}
 					onclick={togglePlaylist}
 				/>
 			</Tooltip>

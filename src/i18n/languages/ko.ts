@@ -1,5 +1,5 @@
-import Key from "../i18nKey";
-import type { Translation } from "../translation";
+import Key from "../i18nKey-runtime.mjs";
+import type { Translation } from "../translation.ts";
 
 export const ko: Translation = {
 	[Key.home]: "홈",
@@ -89,6 +89,22 @@ export const ko: Translation = {
 	[Key.devicesViewSpecs]: "상세 정보",
 	[Key.devicesFeatured]: "메인 추천",
 
+	[Key.games]: "게임",
+	[Key.gamesBanner]:
+		"내가 플레이하는 게임 — 커버 아트, 평점, 플레이 시간과 한줄평.",
+	[Key.gamesCounts]: "종",
+	[Key.gamesNoResults]: "조건에 맞는 게임이 없습니다",
+	[Key.gamesSearchPlaceholder]: "제목, 개발사, 장르로 검색...",
+	[Key.gamesCategoryLabel]: "게임 카테고리",
+	[Key.gamesStatusPlaying]: "플레이 중",
+	[Key.gamesStatusCompleted]: "클리어",
+	[Key.gamesStatusBacklog]: "밀린 게임",
+	[Key.gamesStatusWishlist]: "위시리스트",
+	[Key.gamesViewDetails]: "스토어 페이지",
+	[Key.gamesFeatured]: "추천",
+	[Key.gamesHours]: "시간",
+	[Key.gamesRating]: "평점",
+
 	[Key.timeline]: "타임라인",
 	[Key.timelineBanner]: "성장 궤적, 중요한 경험 및 이정표 기록.",
 	[Key.timelineCounts]: "개의 기록",
@@ -135,11 +151,26 @@ export const ko: Translation = {
 
 	[Key.tags]: "태그",
 	[Key.categories]: "카테고리",
+	[Key.series]: "시리즈",
+	[Key.seriesCount]: "시리즈",
+	[Key.seriesCounts]: "시리즈",
+	[Key.seriesStatusOngoing]: "연재 중",
+	[Key.seriesStatusCompleted]: "완결",
+	[Key.seriesPartOf]: "이 글은 시리즈의 일부입니다",
+	[Key.seriesPart]: "전체 {total}편 중 {index}편",
+	[Key.seriesPrevInSeries]: "시리즈 내 이전 글",
+	[Key.seriesNextInSeries]: "시리즈 내 다음 글",
+	[Key.seriesViewAll]: "모든 시리즈 보기",
 	[Key.recentPosts]: "최근 게시물",
 	[Key.tableOfContents]: "목차",
 	[Key.formulaScrollable]: "가로로 스크롤 가능한 수식",
+	[Key.fieldRequired]: "필수",
+	[Key.fieldOptional]: "선택 사항",
+	[Key.fieldDeprecated]: "사용 중단",
 	[Key.codeBlockExpand]: "코드 블록 펼치기",
 	[Key.codeBlockCollapse]: "코드 블록 접기",
+	[Key.codeTreeExpand]: "코드 트리 확대",
+	[Key.codeTreeCollapse]: "확대 닫기",
 	[Key.announcement]: "공지사항",
 	[Key.announcementClose]: "공지 닫기",
 
@@ -206,6 +237,7 @@ export const ko: Translation = {
 	[Key.musicHidePlaylist]: "재생 목록 숨기기",
 	[Key.musicEmpty]: "재생 목록에 곡이 없습니다",
 	[Key.musicLoading]: "음악을 불러오는 중...",
+	[Key.musicNotRequested]: "아직 요청되지 않음",
 	[Key.musicNowPlaying]: "지금 재생 중: {title}",
 	[Key.musicErrorEmptyPlaylist]: "재생 목록이 비어 있습니다.",
 	[Key.musicErrorSourceUnavailable]: "이 곡을 재생할 수 없습니다.",
@@ -254,7 +286,9 @@ export const ko: Translation = {
 	[Key.randomReadingSubtitle]: "다른 글에서 일관된 기준으로 선정",
 	[Key.copySuccess]: "클립보드에 복사되었습니다",
 	[Key.copyLink]: "링크 복사",
+	[Key.copySelection]: "복사",
 	[Key.copyFailed]: "링크 복사에 실패했습니다. 직접 복사해 주세요.",
+	[Key.sharePageLink]: "페이지 링크 공유",
 
 	[Key.shareArticle]: "게시글 공유",
 	[Key.shareArticleDescription]:
@@ -267,6 +301,10 @@ export const ko: Translation = {
 	[Key.retry]: "다시 시도",
 	[Key.backToTop]: "맨 위로 돌아가기",
 	[Key.backToComment]: "댓글로 이동",
+	[Key.notFound]: "404",
+	[Key.notFoundTitle]: "이 페이지는 길을 잃었어요",
+	[Key.notFoundDescription]:
+		"이동되었거나 보관되었거나, 처음부터 존재하지 않았을 수도 있어요.",
 	[Key.backToHome]: "홈으로 돌아가기",
 	[Key.close]: "닫기",
 	[Key.scanToRead]: "QR 코드로 글 읽기",

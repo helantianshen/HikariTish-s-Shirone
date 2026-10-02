@@ -8,10 +8,11 @@
 
 ## 1. 设计原则
 
-1. **动态配色（HCT）**：所有颜色由客户端引擎按 种子色相 × 风格 × 规范 × 明暗 实时计算（`mc-utils.ts`），而非硬编码。
-2. **令牌驱动**：组件只引用语义令牌（`--primary`、`--surface-container-high`…），不出现具体色值。
-3. **原子化**：UI 由 `src/components/atoms/` 下的原子组件组合而成，原子统一消费令牌与状态层。
-4. **站内风格优先**：M3 规范与站点既有视觉冲突时，以站点风格为准（例：按钮圆角用 12px `--shape-corner-m` 而非 M3 胶囊）。
+1. **Personal（个性化 / HCT 动态配色）**：所有颜色由客户端引擎按 种子色相 × 风格 × 规范 × 明暗 实时计算（`mc-utils.ts`），而非硬编码。调色板随用户配置与明暗模式自适应生成完整 56 角色色彩方案。
+2. **Adaptive（自适应响应式与版心约束）**：以 5 类窗口尺寸类别（Window Size Classes）为基准自适应适配移动端、平板、桌面与超宽屏；大屏与超宽屏严格执行 840–1040dp 最大可读版心约束，杜绝长文无限横拉。
+3. **Expressive（富有表现力）**：全面吸纳 Material Design 3 Expressive（MD3/M3E）规范，引入交互形状变形（Shape morphing，如 ToggleButton/SplitButton/SearchBar）、微物理弹簧质感（Spring physics）、强调字体阶梯（Emphasized typescale）与色调表面层叠（Tonal surface hierarchy），在长文阅读的静谧舒适中注入灵动反馈。
+4. **令牌驱动与原子化**：组件只引用语义令牌（`--primary`、`--surface-container-high`…），UI 由 `src/components/atoms/` 下的原子组件组合而成，原子统一消费令牌与状态层。
+5. **站内风格契约优先**：M3 规范与站点既有视觉冲突时，以站点既定风格契约为准（例：按钮与输入框圆角统一为 12px `--shape-corner-m` 而非 M3 胶囊；卡片采用 16px `--shape-corner-l`；对话框采用 28px `--shape-corner-xl`）。
 
 ---
 
@@ -111,6 +112,20 @@ variables.styl  --mc-* → 语义令牌（--primary、--surface-container-low…
 
 ### 3.6 响应式 / 间距 / 密度
 
+#### 3.6.1 窗口尺寸类别（Window Size Classes）
+
+对齐 Material Design 3 规范五大窗口尺寸类别与站内 Tailwind 断点系统：
+
+| 窗口尺寸类别 | 视口宽度（dp / px） | 对应断点 | 布局与导航交互形态 |
+|---|---|---|---|
+| **Compact** | < 600dp（< 640px） | `< bp-sm` | 单列垂直阅读流；64dp 顶栏 + 底部导航栏 / 模态抽屉；触摸热区强制 >= 48dp |
+| **Medium** | 600–839dp（640–768px） | `bp-sm` ~ `bp-md` | 紧凑顶栏或导航导轨（Rail）；搜索与卡片进入停靠式（docked）视图 |
+| **Expanded** | 840–1199dp（768–1024px） | `bp-md` ~ `bp-lg` | 核心桌面双列阅读流：主文容器 + 常驻侧栏；顶栏展开完整面包屑与搜索条 |
+| **Large** | 1200–1599dp（1024–1280px） | `bp-lg` ~ `bp-xl` | 三列扩展视图（挂载次级侧栏挂件时）；正文阅读列保持稳定版心 |
+| **Extra-large** | 1600dp+（>= 1280px） | `>= bp-xl` | **最大可读版心约束**：正文严格约束在 840–1040dp 内居中，两侧留出余白，严禁长文无限横拉 |
+
+#### 3.6.2 断点与编译期常量
+
 断点对齐 Tailwind 默认（`sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536`）：
 
 | 令牌 | 值 | 用途 |
@@ -120,17 +135,32 @@ variables.styl  --mc-* → 语义令牌（--primary、--surface-container-low…
 
 组件断点写法：`@media (min-width: bp-md)` / `@media (max-width: bp-md - 1px)`（stylus 0.64 会把变量型 min/max-width 规范化为 range 语法 `width >= 768px`，语义等价）。禁止在组件里散落硬编码断点值。
 
-间距（M3 4dp 网格）：
+#### 3.6.3 8dp 间距系统（4dp 微网格）
+
+布局与组件内边距遵循 8dp 主节奏并以 4dp 为微调步进：
 
 | 令牌 | 值 |
 |---|---|
-| `--m3e-space-1..6 / 8 / 10` | 4 / 8 / 12 / 16 / 20 / 24 / 32 / 40px |
+| `--m3e-space-1` | 4px | 最小微调网格、行内图标微间隙 |
+| `--m3e-space-2` / `compact` | 8px | 紧凑控件内边距、芯片间距、列表项间隙 |
+| `--m3e-space-3` / `control` | 12px | 核心控件（Button / TextField）标准内边距 |
+| `--m3e-space-4` | 16px | 移动端卡片内边距、标准容器槽宽（gutter） |
+| `--m3e-space-5` | 20px | 中型组件外边距 |
+| `--m3e-space-6` / `section` | 24px | 桌面卡片内边距、侧栏挂件间距、标准页面外边距（margin） |
+| `--m3e-space-8` / `content` | 32px | 文章段落区块大分隔 |
+| `--m3e-space-10` / `page` | 40px | 页面大区块垂直间距、页头下方分界 |
 
-密度：
+#### 3.6.4 密度与无障碍约束
 
 | 令牌 | 值 | 说明 |
 |---|---|---|
 | `--m3e-density` | `0`（comfortable）/ `-1`（compact） | 桌面精确指针（`(hover:hover) and (pointer:fine)`）自动 -1；组件高度用 `calc(基础 + var(--m3e-density) * 4px)` 参与密度，不引用者无感 |
+
+**无障碍与对比度硬性约束（WCAG 2.1 AA）**：
+1. **文字对比度**：普通正文与说明文字对比度必须 >= **4.5:1**；大标题（>= 18pt 或 >= 14pt 加粗）必须 >= **3:1**。
+2. **边界对比度**：输入框外框、开关轨道、重要焦点环等交互边界必须 >= **3:1**（统一使用 `--outline`）；装饰性分隔线与卡片描边使用 `--outline-variant`。
+3. **色调配对**：严禁随意跨角色混配色值（如不可把 `on-primary` 放到 `surface` 上，或把 `on-surface` 放到 `primary` 上），必须严格维持 HCT 调色板的对偶安全性。
+4. **触控目标**：移动端与交互控件可点击区域维持至少 48×48dp。
 
 ### 3.7 状态层（.m3-state-layer）
 
@@ -195,7 +225,7 @@ variables.styl  --mc-* → 语义令牌（--primary、--surface-container-low…
 | Banner | `overlay/Banner.svelte` | 横幅（官方 Banner 移植，token v0.192 md-comp-banner）：`text`（body-medium on-surface-variant）、`icon?`（Iconify，40px 圆形 primary 24px）、`actions: {label,onClick}[]`（TextButton 风格 label-large primary、state layer，最多 2 个）；容器 surface-container-low + `--m3e-elevation-1`；`shape`（square 默认方角 / round 最新版 28px 圆角）；`compact` 紧凑形态（图标缩为 24px/16px、内边距收窄，圆角 + 图标 + 多操作也能保持单行 52px，适合提示条/内嵌横幅）；高度自适应吻合官方 token：单行 52px / 带图标 72px / 多行 92px（约 3 行），40px 触摸目标通过负 margin 不撑高容器；适用公告/Cookie 声明/离线提示等 | surface-container-low / primary、on-surface-variant | 移植 |
 | Chips | `action/Chips.svelte` | 标签组（官方 Chip 移植，token 对齐 v0.192 md-comp-{assist,filter,input,suggestion}-chip）：四种形态 assist（描边辅助 + primary 18px 前置图标）/ filter（筛选，单选 `value` / 多选 `multiple`+`values`，均 $bindable，选中 secondary-container + 勾选）/ input（输入，点击切换选中 + 尾部删除 `onremove`，支持 24px 头像、可覆盖 trailing 图标）/ suggestion（建议，描边 + primary 前置图标）；容器 32px 高、corner-small 8px、label-large，flex-wrap 自动换行 gap 8px；原生 button + m3-state-layer（hover/focus/pressed），filter 用 aria-pressed，整体/单 chip 禁用（opacity 0.38）；适用标签筛选/输入标签/搜索建议/辅助操作（**已生产落地**：友链页标签筛选） | secondary-container / on-secondary-container、on-surface、on-surface-variant、primary、outline | 移植 |
 | IconButton | `action/IconButton.svelte` | 图标按钮（官方 IconButton 移植，token 对齐 v0.192 md-comp-{icon,filled,filled-tonal,outlined}-icon-button + latest 尺寸/shape）：四种变体 standard（透明 + on-surface）/ filled（primary 圆底 + on-primary）/ tonal（secondary-container 圆底）/ outlined（透明 + outline 描边）；尺寸 latest：xsmall 32/图标20、small 40/24（默认）、medium 56/24、large 96/32、xlarge 136/40；shape round（默认圆形）/ square（按尺寸 corner-medium~extra-large），toggle 选中时形状互换（官方行为）；toggle 模式 checked（$bindable）+ checkedIcon 切换、aria-pressed 同步；交互：原生 button + m3-state-layer；disabled 对齐官方（图标 38%、filled/tonal 容器 12%）；适用工具条操作/收藏开关/AppBar 动作（**已生产落地**，替换旧 IconButton.astro；支持 `href`/`target`/`rel` 渲染 `<a>`；图标两种方式：`icon` prop 仅限客户端水合场景，SSR 静态场景必须用 `children` 传 astro-icon） | primary / on-primary、secondary-container / on-secondary-container、on-surface、inverse-on-surface、outline | 移植 |
-| Menu | `navigation/Menu.svelte` | `open`（$bindable）、`label`、`variant`（standard/vibrant，vibrant 为 tertiary 基高强调）、`exclusive`（默认 true：单开互斥，打开时经 `menu-bus` 通知其他菜单/FABMenu 关闭；false 则不参与）、class；受控容器，ESC/外部点击关闭（点击其他菜单内不关闭），**:global(.m3-menu-item)** 项样式（44px）＋ `.selected`/`.checked` 状态、`.m3-menu-group` 分组（surface-container-low 背景 + hover 8→16px 形状变形、组间距 2px）、`width: max-content` 宽度稳定；**动画**：展开/收起 **scale 1↔0.8 + fade**（官方 DropdownMenu transition：FastSpatial/FastEffects spring 近似，展开 250ms decelerate / 收起 150ms accelerate，`--menu-origin` 锚点缩放默认 top center）、菜单项 hover 背景 150ms 过渡、勾选图标 `.m3-menu-item__check`（checked 时 scaleX 0→1 + fade，官方 expandHorizontally）；**项结构辅助类**：`.m3-menu-item__trailing`（margin-left:auto 右对齐 trailing 内容）、`.m3-menu-item__content`（flex 列，标签 + 辅助文字垂直排列）、`.m3-menu-item__label`（label-large）、`.m3-menu-item__supporting`（body-small + on-surface-variant，官方 supportingText） | surface-container / tertiary-container、`--m3e-elevation-2` | 移植 |
+| Menu | `navigation/Menu.svelte` | `open`（$bindable）、`label`、`variant`（standard/vibrant，vibrant 为 tertiary 基高强调）、`exclusive`（默认 true：单开互斥，打开时经 `menu-bus` 通知其他菜单/FABMenu 关闭；false 则不参与）、class；受控容器，ESC/外部点击关闭（点击其他菜单内不关闭），**:global(.m3-menu-item)** 项样式（48px）＋ `.selected`/`.checked`/`:disabled` 状态、`.m3-menu-group` 分组（surface-container-low 背景 + hover 8→16px 形状变形、组间距 2px）、112–280px 宽度约束；**动画**：展开/收起 **scale 1↔0.8 + fade**（官方 DropdownMenu transition：FastSpatial/FastEffects spring 近似，展开 250ms decelerate / 收起 150ms accelerate，`--menu-origin` 锚点缩放默认 top center）、菜单项 hover 背景 150ms 过渡、勾选图标 `.m3-menu-item__check`（checked 时 scaleX 0→1 + fade，官方 expandHorizontally）；**项结构辅助类**：`.m3-menu-item__trailing`（margin-left:auto 右对齐 trailing 内容）、`.m3-menu-item__content`（flex 列，标签 + 辅助文字垂直排列）、`.m3-menu-item__label`（label-large）、`.m3-menu-item__supporting`（body-small + on-surface-variant，官方 supportingText） | surface-container / tertiary-container、`--m3e-elevation-2` | 移植 |
 | ListItem | `display/ListItem.svelte` | 列表项（官方 ListItem.kt）：`headline`（label-large）、`overLine`（label-small）、`supporting`（body-medium，最多 2 行省略）、`leading`/`trailing` 插槽（40dp/24dp 区域）；行高按内容自适应：单行 56dp / 两行 72 / 三行 88（官方 ContainerHeight/TwoLine/ThreeLine）；`selected` 选中态 secondary-container、`onClick` 传入渲染为可点击 button（hover on-surface 8% + aria-pressed） | secondary-container / on-surface-variant | 移植 |
 | LoadingIndicator | `feedback/LoadingIndicator.svelte` | 加载指示器（官方 LoadingIndicator.kt，M3E 特有形状 morph 加载器）：形状数据与官方同源（androidx.graphics.shapes 的 RoundedPolygon + Morph feature-matching，cubic 对线性插值，见 `loadingShapes.ts`）；indeterminate 在 **7 形状循环 morph**（SoftBurst/Cookie9/Pentagon/Pill/Sunny/Cookie4/Oval，官方 IndeterminateIndicatorPolygons），每段 spring（damping 0.6/stiffness 200/visibilityThreshold 0.1）+ 650ms 间隔（MorphIntervalMillis）+ 逐段累计旋转 90° + **整体线性旋转 4666ms/圈**（GlobalRotationDurationMillis）；determinate 官方 DeterminateIndicatorPolygons（Circle 旋转 18° → SoftBurst），progress 0→1 线性 morph + 逆时针 `-progress*180°`；指示器缩放 = calculateScaleFactor × ActiveIndicatorScale（38/48）居中于 48×48 容器；`color`/`size`（默认 48）/`contained`（官方 ContainedLoadingIndicator：primary-container 圆形容器 + on-primary-container 指示器）/`containerColor` | primary / on-primary-container + primary-container | 移植 |
 | DateInput | `input/DateInput.svelte` | 日期文本输入（官方 DateInputTextField 独立版）：`value`（ISO "YYYY-MM-DD" $bindable，非法时保持旧值）、`label`（浮动标签）、`placeholder`、`yearRange`、`leading` 插槽（默认日历图标）；输入自动按 YYYY/MM/DD 分段格式化（官方 DateInputFormat）；blur/Enter 校验（官方 DateInputValidator）：格式 / 年份范围 / 月份 / 真实日期（new Date 回验），错误显示 error 色下划线 + 提示；结构对齐 TextField（surface-container-high 填充 + 下划线 + focus primary） | surface-container-high / primary、error | 移植 |
@@ -294,6 +324,8 @@ variables.styl  --mc-* → 语义令牌（--primary、--surface-container-low…
 | `src/components/molecules/Announcement.astro` | 公告侧栏 widget（Banner round，内容源 `announcementConfig`），见 `docs/common-components.md` §3.1 |
 | `src/components/molecules/LastUpdatedNotice.astro` | 文章最后更新提示（SSR 语义化日期 + UTC 日历天数），由 `src/utils/last-updated-notice.ts` 在首屏及 Swup 换页后校正 |
 | `src/components/molecules/ArticleDiscoveryItem.astro` | 文章内部延伸阅读链接行：使用 AccentBar、SSR 图标与整行状态层，按主题关联/稳定随机轨道映射 primary/tertiary 语义角色，无嵌套 Card、无客户端水合 |
+| `src/components/molecules/Series.astro` | 系列列表侧栏 widget（WidgetLayout + 复用 `CategoryList`，按最近更新排序，受 `seriesConfig.enable` 门控），见 `docs/sidebar-widgets.md` 第 11 节 |
+| `src/components/molecules/SeriesCard.astro` | 文章内系列块（系列名 + 第 N/共 M + 组内上一篇/下一篇，位置由 `seriesConfig.cardPosition` 决定），两条文章路由共用；无容器背景的分节，状态 pill 走 M3 tonal 配对 |
 | `src/components/organisms/ArticleDiscovery.astro` | 文章主 Card 内的延伸阅读编排：接收页面构建期选好的相关文章与随机文章，以分隔线和语义列表承接正文，随 Swup 主内容整体替换 |
 | `src/components/organisms/ArticleShare.svelte` | 文章主 Card 内的分享编排：链接复制、海报生成中状态、预览与下载 |
 | `src/utils/share-poster.ts` | 分享海报生成底层工具：动态按需加载 qrcode、读取当前主题色快照、Canvas 2D 绘制固定宽度、内容高度的海报并输出 PNG Blob |
@@ -334,4 +366,3 @@ npx playwright test -g "TOC"                   # 按标题过滤
   - 主题引擎写入 `--mc-*` 后组件颜色带 transition，断言前必须等过渡收敛（`--m3e-duration-short` 150ms），否则会拿到中间帧的 `rgba` 混合值。
   - 交互类断言同样要等动画结束；菜单项选中后容器加 `.closed` 隐藏（项保留在 DOM，应断言容器而非计数）。
   - 颜色一律按 token 对齐（`--secondary-container` 等），不写死具体色值（默认色相已定为 315）。
-

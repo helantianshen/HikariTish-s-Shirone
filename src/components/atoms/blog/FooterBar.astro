@@ -16,6 +16,8 @@ interface Props {
 	year?: number;
 	links?: FooterLink[];
 	poweredBy?: FooterLink[];
+	version?: string;
+	versionHref?: string;
 	/** 自定义注入的页脚 HTML（来自 FooterConfig.html） */
 	customHtml?: string;
 	class?: string;
@@ -26,6 +28,8 @@ const {
 	year = new Date().getFullYear(),
 	links = [],
 	poweredBy = [],
+	version = "",
+	versionHref = "",
 	customHtml = "",
 	class: className,
 } = Astro.props;
@@ -63,6 +67,22 @@ const {
 						>{l.label}</a>
 					</Fragment>
 				))}
+				{version && (
+					<Fragment>
+						<span class="m3-blog-footer__sep" aria-hidden="true">/</span>
+						<span class="m3-blog-footer__version">
+							<span>Version</span>
+							{versionHref ? (
+								<a
+									class="m3-blog-footer__link"
+									href={versionHref}
+									target="_blank"
+									rel="noopener noreferrer"
+								>{version}</a>
+							) : version}
+						</span>
+					</Fragment>
+				)}
 			</p>
 		)}
 	</div>
@@ -107,4 +127,9 @@ const {
 	&__sep
 		margin: 0 0.5rem
 		color: var(--outline-variant)
+
+	&__version
+		display: inline-flex
+		align-items: baseline
+		gap: 0.375rem
 </style>

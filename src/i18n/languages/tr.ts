@@ -1,5 +1,5 @@
-import Key from "../i18nKey";
-import type { Translation } from "../translation";
+import Key from "../i18nKey-runtime.mjs";
+import type { Translation } from "../translation.ts";
 
 export const tr: Translation = {
 	[Key.home]: "Anasayfa",
@@ -90,6 +90,22 @@ export const tr: Translation = {
 	[Key.devicesViewSpecs]: "Detayları gör",
 	[Key.devicesFeatured]: "Öne çıkan",
 
+	[Key.games]: "Oyunlar",
+	[Key.gamesBanner]:
+		"Oynadığım oyunlar — kapak görseli, puan, oynama süresi ve kısa incelemeler.",
+	[Key.gamesCounts]: "oyun",
+	[Key.gamesNoResults]: "Filtrelerle eşleşen oyun yok",
+	[Key.gamesSearchPlaceholder]: "Başlık, geliştirici veya türe göre ara...",
+	[Key.gamesCategoryLabel]: "Oyun kategorileri",
+	[Key.gamesStatusPlaying]: "Oynanıyor",
+	[Key.gamesStatusCompleted]: "Tamamlandı",
+	[Key.gamesStatusBacklog]: "Bekleyen",
+	[Key.gamesStatusWishlist]: "İstek listesi",
+	[Key.gamesViewDetails]: "Mağaza sayfası",
+	[Key.gamesFeatured]: "Öne çıkan",
+	[Key.gamesHours]: "sa",
+	[Key.gamesRating]: "Puan",
+
 	[Key.timeline]: "Zaman Çizelgesi",
 	[Key.timelineBanner]:
 		"Büyüme yolculuğu, kilometre taşları ve unutulmaz anlar.",
@@ -138,11 +154,26 @@ export const tr: Translation = {
 
 	[Key.tags]: "Taglar",
 	[Key.categories]: "Katagoriler",
+	[Key.series]: "Seri",
+	[Key.seriesCount]: "seri",
+	[Key.seriesCounts]: "seri",
+	[Key.seriesStatusOngoing]: "Devam ediyor",
+	[Key.seriesStatusCompleted]: "Tamamlandı",
+	[Key.seriesPartOf]: "Bu yazı serinin bir parçası",
+	[Key.seriesPart]: "{total} bölümün {index}. bölümü",
+	[Key.seriesPrevInSeries]: "Seride önceki",
+	[Key.seriesNextInSeries]: "Seride sonraki",
+	[Key.seriesViewAll]: "Tüm serileri görüntüle",
 	[Key.recentPosts]: "Son Paylaşımlar",
 	[Key.tableOfContents]: "İçindekiler",
 	[Key.formulaScrollable]: "Yatay kaydırılabilir formül",
+	[Key.fieldRequired]: "Zorunlu",
+	[Key.fieldOptional]: "İsteğe bağlı",
+	[Key.fieldDeprecated]: "Kullanımdan kaldırıldı",
 	[Key.codeBlockExpand]: "Kod bloğunu genişlet",
 	[Key.codeBlockCollapse]: "Kod bloğunu daralt",
+	[Key.codeTreeExpand]: "Kod ağacını genişlet",
+	[Key.codeTreeCollapse]: "Genişletilmiş görünümü kapat",
 	[Key.announcement]: "Duyuru",
 	[Key.announcementClose]: "Duyuruyu Kapat",
 
@@ -209,6 +240,7 @@ export const tr: Translation = {
 	[Key.musicHidePlaylist]: "Çalma listesini gizle",
 	[Key.musicEmpty]: "Çalma listesinde parça yok",
 	[Key.musicLoading]: "Müzik yükleniyor...",
+	[Key.musicNotRequested]: "Henüz istenmedi",
 	[Key.musicNowPlaying]: "Şimdi çalıyor: {title}",
 	[Key.musicErrorEmptyPlaylist]: "Çalma listesi boş.",
 	[Key.musicErrorSourceUnavailable]: "Bu parça kullanılamıyor.",
@@ -257,7 +289,9 @@ export const tr: Translation = {
 	[Key.randomReadingSubtitle]: "Diğer yazılardan tutarlı bir seçim",
 	[Key.copySuccess]: "Panoya kopyalandı",
 	[Key.copyLink]: "Bağlantıyı kopyala",
+	[Key.copySelection]: "Kopyala",
 	[Key.copyFailed]: "Bağlantı kopyalanamadı. Lütfen manuel kopyalayın.",
+	[Key.sharePageLink]: "Sayfa bağlantısını paylaş",
 
 	[Key.shareArticle]: "Makaleyi Paylaş",
 	[Key.shareArticleDescription]:
@@ -271,6 +305,10 @@ export const tr: Translation = {
 	[Key.retry]: "Tekrar Dene",
 	[Key.backToTop]: "Yukarı dön",
 	[Key.backToComment]: "Yorumlara git",
+	[Key.notFound]: "404",
+	[Key.notFoundTitle]: "Bu sayfa yolunu kaybetti",
+	[Key.notFoundDescription]:
+		"Taşınmış, arşivlenmiş veya aslen hiç yok olmuş olabilir.",
 	[Key.backToHome]: "Ana sayfaya dön",
 	[Key.close]: "Kapat",
 	[Key.scanToRead]: "Makaleyi okumak için tara",

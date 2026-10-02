@@ -3,7 +3,7 @@ import { i18n } from "@i18n/translation";
 import { getPublishedInstant, getUpdatedInstant } from "@utils/content-date";
 import { getSortedPosts } from "@utils/content-utils";
 import { isEncryptedPost } from "@utils/post-encryption";
-import { url } from "@utils/url-utils";
+import { getPostUrl } from "@utils/url-utils";
 import MarkdownIt from "markdown-it";
 import sanitizeHtml from "sanitize-html";
 
@@ -82,7 +82,7 @@ export async function getFeedPosts(site: URL): Promise<FeedPostItem[]> {
 			});
 		}
 
-		const postUrl = new URL(url(`/posts/${post.id}/`), site).href;
+		const postUrl = new URL(getPostUrl(post), site).href;
 		const pubDate = getPublishedInstant(post.data);
 		const updated = getUpdatedInstant(post.data);
 

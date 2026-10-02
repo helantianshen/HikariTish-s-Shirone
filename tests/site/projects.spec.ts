@@ -139,7 +139,7 @@ test.describe("项目页", () => {
 	});
 
 	test("桌面与手机布局之间无刷新切换时重置瀑布流定位", async ({ page }) => {
-		await page.setViewportSize({ width: 1280, height: 900 });
+		await page.setViewportSize({ width: 1440, height: 900 });
 		const grid = page.locator(".projects-section__grid");
 		const cards = page.locator(".project-card");
 
@@ -200,7 +200,7 @@ test.describe("项目页", () => {
 		await expect(cards).toHaveCount(PROJECT_COUNT);
 		await expect(page).toHaveURL(/\/projects\/$/);
 
-		await page.setViewportSize({ width: 1280, height: 900 });
+		await page.setViewportSize({ width: 1440, height: 900 });
 
 		await expect
 			.poll(() =>

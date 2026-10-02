@@ -145,7 +145,23 @@ const CONFIG_DEFAULTS = {
 	},
 	comment: {
 		enable: false,
+		provider: "none",
 		twikoo: { envId: "", scriptUrl: "https://cdn.example.com/twikoo.js" },
+		// giscus 形状与主题真实默认值同构：嵌套 theme 明暗双值 + 空字符串占位的必填字段。
+		giscus: {
+			repo: "",
+			repoId: "",
+			category: "Announcements",
+			categoryId: "",
+			mapping: "pathname",
+			strict: false,
+			reactionsEnabled: true,
+			emitMetadata: false,
+			inputPosition: "bottom",
+			theme: { light: "light", dark: "dark" },
+			lang: "auto",
+			scriptUrl: "https://giscus.app/client.js",
+		},
 	},
 };
 
@@ -702,13 +718,23 @@ describe("content:export 内容文件导出", () => {
 			"public/assets/moments/thumbnails/a-192.webp",
 			"public/assets/anime/covers/x.webp",
 			"assets/fonts/.subset/x.woff2",
+		]) {
+			assert.equal(
+				existsSync(join(content, path)),
+				false,
+				`${path} 不应被导出——内容仓持有它会让 content:sync 直接报错`,
+			);
+		}
+		// 快照与 .gitkeep 不属于「同步报错」的生成物（同步方向允许内容仓提供），
+		// 导出侧只是永不回写：避免把基线/占位文件倒灌进内容仓。
+		for (const path of [
 			"data/anime-snapshots/bangumi.json",
 			"data/anime-snapshots/.gitkeep",
 		]) {
 			assert.equal(
 				existsSync(join(content, path)),
 				false,
-				`${path} 不应被导出——内容仓持有它会让 content:sync 直接报错`,
+				`${path} 不应被导出（导出侧对基线与代码仓自有文件一律跳过）`,
 			);
 		}
 	});
@@ -833,6 +859,41 @@ export const userConfigSources = [];
 		// 数组整体替换。
 		assert.match(read(content, "config/llms.yaml"), /- 日记/);
 		assert.doesNotMatch(read(content, "config/llms.yaml"), /secret/);
+	});
+
+	it("giscus 嵌套对象的局部覆盖只导出差异键", () => {
+		const { code, content } = createFixture();
+		write(
+			code,
+			"src/user/user-config.ts",
+			`export const userConfigOverrides = {
+	comment: {
+		enable: true,
+		provider: "giscus",
+		giscus: {
+			repo: "owner/repo",
+			repoId: "R_placeholder",
+			categoryId: "DIC_placeholder",
+			theme: { dark: "transparent_dark" },
+		},
+	},
+};
+export const userConfigSources = [];
+`,
+		);
+
+		exportRun(code, ["--yes", "--config", "--force"]);
+
+		const comment = read(content, "config/comment.yaml");
+		assert.match(comment, /enable: true/);
+		assert.match(comment, /provider: giscus/);
+		assert.match(comment, /repo: owner\/repo/);
+		assert.match(comment, /dark: transparent_dark/);
+		// theme.light 未覆盖，保持主题默认值，不该出现在最小覆盖集里。
+		assert.doesNotMatch(comment, /light:/);
+		// 与默认值相同的键（mapping、scriptUrl 等）不导出。
+		assert.doesNotMatch(comment, /mapping:/);
+		assert.doesNotMatch(comment, /scriptUrl:/);
 	});
 
 	it("新建的 YAML 带说明抬头；已有文件保留注释与格式", () => {

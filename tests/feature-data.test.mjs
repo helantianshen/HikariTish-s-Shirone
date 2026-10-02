@@ -30,7 +30,11 @@ describe("Feature Data & Resolver Tests", () => {
 			categories: [],
 			disabledKeys: ["folkpatch"],
 		};
-		const resolved = resolveProjectsData(config);
+		const resolved = resolveProjectsData(config, [
+			{ key: "shirone" },
+			{ key: "kernelpatch" },
+			{ key: "folkpatch" },
+		]);
 		assert.ok(resolved.some((p) => p.key === "shirone"));
 		assert.ok(resolved.some((p) => p.key === "kernelpatch"));
 		assert.ok(!resolved.some((p) => p.key === "folkpatch"));
@@ -54,9 +58,36 @@ describe("Feature Data & Resolver Tests", () => {
 			order: "asc",
 			disabledTitles: ["Senior Frontend Engineer"],
 		};
-		const resolved = resolveTimelineData(config);
+		const resolved = resolveTimelineData(config, [
+			{ title: "Senior Frontend Engineer", date: "2025.01" },
+			{
+				title: "Computer Science & Engineering Degree",
+				date: "2020.09 – 2024.06",
+			},
+		]);
 		assert.ok(!resolved.some((t) => t.title === "Senior Frontend Engineer"));
-		assert.equal(resolved[0].title, "Started Personal Blog & Tech Notes");
+		// 最旧的测试条目应排在首位
+		assert.equal(resolved[0].title, "Computer Science & Engineering Degree");
+	});
+
+	it("resolveTimelineData sorts correctly by date in desc and asc order", () => {
+		const customItems = [
+			{ title: "Old", date: "2021.05" },
+			{ title: "Recent", date: "2024.10" },
+			{ title: "Present", date: "2025.01 - Present" },
+			{ title: "Middle", date: "2023.01" },
+		];
+		const descRes = resolveTimelineData({ order: "desc" }, customItems);
+		assert.deepEqual(
+			descRes.map((i) => i.title),
+			["Present", "Recent", "Middle", "Old"],
+		);
+
+		const ascRes = resolveTimelineData({ order: "asc" }, customItems);
+		assert.deepEqual(
+			ascRes.map((i) => i.title),
+			["Old", "Middle", "Recent", "Present"],
+		);
 	});
 
 	it("resolveDevicesData applies disabledIds correctly", () => {

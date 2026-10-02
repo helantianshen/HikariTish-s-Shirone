@@ -140,4 +140,41 @@ test.describe("Site post", () => {
 			"Copied to clipboard",
 		);
 	});
+
+	test("post with cover has correct og:image and twitter:image metadata", async ({
+		page,
+	}) => {
+		await page.goto("/posts/guide/", { waitUntil: "domcontentloaded" });
+		const ogImage = page.locator('meta[property="og:image"]');
+		await expect(ogImage).toHaveCount(1);
+		const ogImageUrl = await ogImage.getAttribute("content");
+		expect(ogImageUrl).toMatch(
+			/^https?:\/\/.*(\/_astro\/|\/@fs\/.*\/)cover(\..*)?\.(jpeg|jpg|webp|avif|png)(\?.*)?$/,
+		);
+
+		const twitterImage = page.locator('meta[name="twitter:image"]');
+		await expect(twitterImage).toHaveCount(1);
+		const twitterImageUrl = await twitterImage.getAttribute("content");
+		expect(twitterImageUrl).toBe(ogImageUrl);
+
+		const twitterCard = page.locator('meta[name="twitter:card"]');
+		await expect(twitterCard).toHaveAttribute("content", "summary_large_image");
+	});
+
+	test("post without cover falls back to desktop banner image metadata", async ({
+		page,
+	}) => {
+		await page.goto("/posts/markdown/", { waitUntil: "domcontentloaded" });
+		const ogImage = page.locator('meta[property="og:image"]');
+		await expect(ogImage).toHaveCount(1);
+		const ogImageUrl = await ogImage.getAttribute("content");
+		expect(ogImageUrl).toMatch(
+			/^https?:\/\/.*(\/_astro\/|\/@fs\/.*\/)1(\..*)?\.(webp|avif|png|jpg)(\?.*)?$/,
+		);
+
+		const twitterImage = page.locator('meta[name="twitter:image"]');
+		await expect(twitterImage).toHaveCount(1);
+		const twitterImageUrl = await twitterImage.getAttribute("content");
+		expect(twitterImageUrl).toBe(ogImageUrl);
+	});
 });

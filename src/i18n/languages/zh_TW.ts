@@ -1,5 +1,5 @@
-import Key from "../i18nKey";
-import type { Translation } from "../translation";
+import Key from "../i18nKey-runtime.mjs";
+import type { Translation } from "../translation.ts";
 
 export const zh_TW: Translation = {
 	[Key.home]: "首頁",
@@ -84,6 +84,21 @@ export const zh_TW: Translation = {
 	[Key.devicesViewSpecs]: "查看詳情",
 	[Key.devicesFeatured]: "主力推薦",
 
+	[Key.games]: "遊戲",
+	[Key.gamesBanner]: "我在玩的遊戲——封面、評分、遊玩時長與短評。",
+	[Key.gamesCounts]: "款遊戲",
+	[Key.gamesNoResults]: "沒有找到符合的遊戲",
+	[Key.gamesSearchPlaceholder]: "依名稱、開發商或類型搜尋...",
+	[Key.gamesCategoryLabel]: "遊戲分類",
+	[Key.gamesStatusPlaying]: "正在遊玩",
+	[Key.gamesStatusCompleted]: "已破關",
+	[Key.gamesStatusBacklog]: "積壓待玩",
+	[Key.gamesStatusWishlist]: "願望清單",
+	[Key.gamesViewDetails]: "商店頁面",
+	[Key.gamesFeatured]: "特別推薦",
+	[Key.gamesHours]: "小時",
+	[Key.gamesRating]: "評分",
+
 	[Key.timeline]: "時間線",
 	[Key.timelineBanner]: "成長軌跡、重要經歷與里程碑記錄。",
 	[Key.timelineCounts]: "個節點",
@@ -130,11 +145,26 @@ export const zh_TW: Translation = {
 
 	[Key.tags]: "標籤",
 	[Key.categories]: "分類",
+	[Key.series]: "系列",
+	[Key.seriesCount]: "個系列",
+	[Key.seriesCounts]: "個系列",
+	[Key.seriesStatusOngoing]: "連載中",
+	[Key.seriesStatusCompleted]: "已完結",
+	[Key.seriesPartOf]: "本文屬於系列",
+	[Key.seriesPart]: "第 {index} 篇，共 {total} 篇",
+	[Key.seriesPrevInSeries]: "系列內上一篇",
+	[Key.seriesNextInSeries]: "系列內下一篇",
+	[Key.seriesViewAll]: "查看全部系列",
 	[Key.recentPosts]: "最新文章",
 	[Key.tableOfContents]: "文章目錄",
 	[Key.formulaScrollable]: "可橫向捲動的公式",
+	[Key.fieldRequired]: "必填",
+	[Key.fieldOptional]: "可選",
+	[Key.fieldDeprecated]: "已棄用",
 	[Key.codeBlockExpand]: "展開程式碼區塊",
 	[Key.codeBlockCollapse]: "摺疊程式碼區塊",
+	[Key.codeTreeExpand]: "放大程式碼樹",
+	[Key.codeTreeCollapse]: "退出放大",
 	[Key.announcement]: "公告",
 	[Key.announcementClose]: "關閉公告",
 
@@ -200,6 +230,7 @@ export const zh_TW: Translation = {
 	[Key.musicHidePlaylist]: "隱藏播放清單",
 	[Key.musicEmpty]: "播放清單中沒有歌曲",
 	[Key.musicLoading]: "正在載入音樂...",
+	[Key.musicNotRequested]: "音樂尚未請求",
 	[Key.musicNowPlaying]: "正在播放：{title}",
 	[Key.musicErrorEmptyPlaylist]: "播放清單是空的",
 	[Key.musicErrorSourceUnavailable]: "此音源無法使用",
@@ -247,7 +278,9 @@ export const zh_TW: Translation = {
 	[Key.randomReadingSubtitle]: "從其他文章中穩定抽取",
 	[Key.copySuccess]: "已複製到剪貼簿",
 	[Key.copyLink]: "複製連結",
+	[Key.copySelection]: "複製",
 	[Key.copyFailed]: "複製失敗，請手動複製",
+	[Key.sharePageLink]: "分享頁面連結",
 
 	[Key.shareArticle]: "分享文章",
 	[Key.shareArticleDescription]: "生成精美分享圖或複製連結，與更多人分享本文。",
@@ -259,6 +292,9 @@ export const zh_TW: Translation = {
 	[Key.retry]: "重試",
 	[Key.backToTop]: "返回頂部",
 	[Key.backToComment]: "直達評論",
+	[Key.notFound]: "404",
+	[Key.notFoundTitle]: "這條路似乎偏離了",
+	[Key.notFoundDescription]: "它可能被移動了、歸檔了，或者本來就不存在。",
 	[Key.backToHome]: "返回首頁",
 	[Key.close]: "關閉",
 	[Key.scanToRead]: "掃碼閱讀全文",

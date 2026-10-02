@@ -132,18 +132,11 @@ const wavyLinearWaveLength = $derived(
 const wavyLinearWaveSpeed = $derived(
 	waveSpeed > 0 ? waveSpeed : wavyLinearWaveLength,
 );
+// 实例级唯一 clipId，供 determinate wavy linear 模式裁切可视区域
+const clipId = `pi-wavy-clip-${Math.random().toString(36).slice(2, 9)}`;
+
 // 全宽路径 = 容器宽 + 左右各 2 个波长余量（官方 widthWithExtraPhase）
 const wavyLinearPathW = $derived(resolvedWidth + wavyLinearWaveLength * 2);
-// 振幅 0..1 直接重建路径（官方 scaleY 近似：controlY 按振幅缩放，stroke 保持 4dp）
-const wavyLinearPathD = $derived(
-	buildLinearWavePath(
-		wavyLinearPathW,
-		wavyLinearWaveLength,
-		WAVY_LINEAR_H,
-		strokeWidth,
-		wavyAmp,
-	),
-);
 // pathLength=100 归一化：1px 宽度对应的归一化长度
 const wavyLinearUnitsPerPx = $derived(100 / wavyLinearPathW);
 const wavyCapW = $derived(strokeCap === "butt" ? 0 : strokeWidth / 2);
@@ -270,6 +263,18 @@ $effect(() => {
 	return cleanup;
 });
 
+// wavy linear 波浪路径（随振幅更新；determinate 模式向左预留一个波长以消除平移闪烁）
+const wavyLinearPathD = $derived(
+	buildLinearWavePath(
+		wavyLinearPathW,
+		wavyLinearWaveLength,
+		WAVY_LINEAR_H,
+		strokeWidth,
+		wavyAmp,
+		determinate ? -wavyLinearWaveLength : 0,
+	),
+);
+
 // wavy circular 星形路径（随振幅 morph）
 const wavyStarD = $derived(
 	buildCircularStarPath({
@@ -298,18 +303,22 @@ const wavyStarD = $derived(
 	        aria-valuenow={determinate ? pct : undefined}
 	        aria-valuemin={determinate ? 0 : undefined}
 	        aria-valuemax={determinate ? 100 : undefined}
-	        style={`--pi-color: ${color}; --pi-track: ${trackColor}; --pi-wave-len: ${-wavyLinearShiftPx}; --pi-wave-dur: ${wavyLinearFlowMs}ms; --pi-wave-shift: ${-wavyLinearWaveLength}px`}
+	        style={`--pi-color: ${color}; --pi-track: ${trackColor}; --pi-wave-dur: ${wavyLinearFlowMs}ms; --pi-wave-shift: ${-wavyLinearWaveLength}px`}
 	    >
 	        {#if determinate}
 	            <svg class="m3-progress__wavy-svg" viewBox={`0 0 ${resolvedWidth} 10`} width="100%" height="10">
+	                <defs>
+	                    <clipPath id={clipId}>
+	                        <rect x="0" y="0" width={wavyLinearHeadPx} height="10" />
+	                    </clipPath>
+	                </defs>
 	                {#if wavyLinearTrackX2 > wavyLinearTrackX1}
 	                    <line x1={wavyLinearTrackX1} x2={wavyLinearTrackX2} y1="5" y2="5" stroke={trackColor} stroke-width={strokeWidth} stroke-linecap={strokeCap}></line>
 	                {/if}
 	                {#if progress > 0}
-	                    <g class="m3-progress__wavy-group">
-	                        <path class:m3-progress__wavy-flow={wavyAmp > 0} d={wavyLinearPathD} pathLength={wavyLinearPathW}
-	                              fill="none" stroke={color} stroke-width={strokeWidth} stroke-linecap={strokeCap}
-	                              stroke-dasharray={`${wavyLinearHeadPx} ${wavyLinearPathW}`}></path>
+	                    <g class="m3-progress__wavy-group" clip-path={`url(#${clipId})`}>
+	                        <path class:m3-progress__wavy-flow={wavyAmp > 0} d={wavyLinearPathD}
+	                              fill="none" stroke={color} stroke-width={strokeWidth} stroke-linecap={strokeCap}></path>
 	                    </g>
 	                {/if}
 	            </svg>
@@ -692,12 +701,9 @@ const wavyStarD = $derived(
             pointer-events: none
             transition: left var(--m3e-duration-short) var(--m3e-easing-standard)
 
-        /* determinate 波流动画：官方段 [s, head+s] 平移 -s 组合——dashoffset 前移一个波长
-           同时 translateX 左移一个波长（同时长同步），波浪连续填满 [0, head]，波峰自头部向尾部（左）流动，无空隙 */
+        /* determinate 波流动画：单一路水平平移，周期无缝衔接，由 clipPath 物理限定可视宽度 */
         .m3-progress__wavy-flow
-            animation:
-                m3-progress-wavy-flow-dash var(--pi-wave-dur) linear infinite,
-                m3-progress-wavy-shift var(--pi-wave-dur) linear infinite
+            animation: m3-progress-wavy-shift var(--pi-wave-dur) linear infinite
 
         /* indeterminate 波流动画：路径左移一个波长（--pi-wave-shift 负 px） */
         .m3-progress__wavy-shift
@@ -844,13 +850,6 @@ const wavyStarD = $derived(
         animation-timing-function: linear
     100%
         transform: rotate(1350deg)
-/* linear wavy 波流动画：dashoffset 平移一个波长（--pi-wave-len 负值，normalized 单位） */
-@keyframes m3-progress-wavy-flow-dash
-    from
-        stroke-dashoffset: 0
-    to
-        stroke-dashoffset: var(--pi-wave-len)
-
 /* linear wavy indeterminate 波流动画：路径左移一个波长（--pi-wave-shift 负 px） */
 @keyframes m3-progress-wavy-shift
     from

@@ -9,7 +9,7 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getSortedPosts } from "@utils/content-utils";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
-import { url } from "@utils/url-utils";
+import { getPostUrl, url } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import { siteConfig } from "@/config";
 
@@ -125,7 +125,7 @@ const posts = allPosts.slice(0, 6);
 		<div class="flex flex-col gap-3">
 			{posts.map((post) => (
 				<a
-					href={url(`/posts/${post.id}/`)}
+					href={getPostUrl(post)}
 					class="group flex flex-col md:flex-row md:items-center justify-between p-4 rounded-[var(--shape-corner-m)] bg-[var(--surface-container-low)] hover:bg-[var(--surface-container-high)] border border-[var(--outline-variant)] transition-all"
 				>
 					<div class="min-w-0 flex-1 md:mr-4">

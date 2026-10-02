@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getPostUrlBySlug } from "@utils/url-utils";
+import { getPostUrl } from "@utils/url-utils";
 import { POST_CARD_MIN_WIDTH, postListConfig } from "@/config/postListConfig";
 import PostCard from "./PostCard.astro";
 
@@ -35,7 +35,7 @@ const { mode, cover, cardWidth } = postListConfig.layout;
                 published={entry.data.published}
                 updated={entry.data.updated}
                 pinned={entry.data.pinned}
-                url={getPostUrlBySlug(entry.id)}
+                url={getPostUrl(entry)}
                 image={entry.data.image}
                 description={entry.data.description}
                 draft={entry.data.draft}

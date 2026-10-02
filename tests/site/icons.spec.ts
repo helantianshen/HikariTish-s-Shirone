@@ -41,7 +41,9 @@ test.describe("SSR 图标渲染", () => {
 	});
 
 	test("文章页复制链接按钮图标可见", async ({ page }) => {
-		await page.goto("/posts/markdown/");
+		await page.goto(
+			"/posts/go/从-channel-到-future-用-go-实现-async-await-模型/",
+		);
 		await expect(page.locator("#copy-post-link svg")).toBeVisible();
 	});
 

@@ -1,5 +1,5 @@
-import Key from "../i18nKey";
-import type { Translation } from "../translation";
+import Key from "../i18nKey-runtime.mjs";
+import type { Translation } from "../translation.ts";
 
 export const th: Translation = {
 	[Key.home]: "หน้าแรก",
@@ -84,6 +84,21 @@ export const th: Translation = {
 	[Key.devicesViewSpecs]: "ดูรายละเอียด",
 	[Key.devicesFeatured]: "แนะนำ",
 
+	[Key.games]: "เกม",
+	[Key.gamesBanner]: "เกมที่เล่น — ปกเกม คะแนน เวลาเล่น และรีวิวสั้น",
+	[Key.gamesCounts]: "เกม",
+	[Key.gamesNoResults]: "ไม่พบเกมที่ตรงกับตัวกรอง",
+	[Key.gamesSearchPlaceholder]: "ค้นหาตามชื่อ ผู้พัฒนา หรือประเภท...",
+	[Key.gamesCategoryLabel]: "หมวดหมู่เกม",
+	[Key.gamesStatusPlaying]: "กำลังเล่น",
+	[Key.gamesStatusCompleted]: "เล่นจบ",
+	[Key.gamesStatusBacklog]: "รอเล่น",
+	[Key.gamesStatusWishlist]: "รายการประสงค์",
+	[Key.gamesViewDetails]: "หน้าร้านค้า",
+	[Key.gamesFeatured]: "แนะนำ",
+	[Key.gamesHours]: "ชม.",
+	[Key.gamesRating]: "คะแนน",
+
 	[Key.timeline]: "ไทม์ไลน์",
 	[Key.timelineBanner]: "เส้นทางการเติบโต เหตุการณ์สำคัญ และบันทึกหมุดหมายชีวิต",
 	[Key.timelineCounts]: "หมุดหมาย",
@@ -128,11 +143,26 @@ export const th: Translation = {
 
 	[Key.tags]: "ป้ายกำกับ",
 	[Key.categories]: "หมวดหมู่",
+	[Key.series]: "ซีรีส์",
+	[Key.seriesCount]: "ซีรีส์",
+	[Key.seriesCounts]: "ซีรีส์",
+	[Key.seriesStatusOngoing]: "กำลังดำเนินอยู่",
+	[Key.seriesStatusCompleted]: "เสร็จสมบูรณ์",
+	[Key.seriesPartOf]: "บทความนี้เป็นส่วนหนึ่งของซีรีส์",
+	[Key.seriesPart]: "ตอนที่ {index} จาก {total}",
+	[Key.seriesPrevInSeries]: "ตอนก่อนหน้าในซีรีส์",
+	[Key.seriesNextInSeries]: "ตอนถัดไปในซีรีส์",
+	[Key.seriesViewAll]: "ดูซีรีส์ทั้งหมด",
 	[Key.recentPosts]: "โพสต์ล่าสุด",
 	[Key.tableOfContents]: "สารบัญ",
 	[Key.formulaScrollable]: "สูตรที่เลื่อนในแนวนอนได้",
+	[Key.fieldRequired]: "จำเป็น",
+	[Key.fieldOptional]: "ไม่บังคับ",
+	[Key.fieldDeprecated]: "เลิกใช้แล้ว",
 	[Key.codeBlockExpand]: "ขยายบล็อกโค้ด",
 	[Key.codeBlockCollapse]: "ย่อบล็อกโค้ด",
+	[Key.codeTreeExpand]: "ขยายโครงสร้างโค้ด",
+	[Key.codeTreeCollapse]: "ปิดมุมมองขยาย",
 	[Key.announcement]: "ประกาศ",
 	[Key.announcementClose]: "ปิดประกาศ",
 
@@ -199,6 +229,7 @@ export const th: Translation = {
 	[Key.musicHidePlaylist]: "ซ่อนรายการเพลง",
 	[Key.musicEmpty]: "ไม่มีเพลงในรายการ",
 	[Key.musicLoading]: "กำลังโหลดเพลง...",
+	[Key.musicNotRequested]: "ยังไม่ได้ร้องขอ",
 	[Key.musicNowPlaying]: "กำลังเล่น: {title}",
 	[Key.musicErrorEmptyPlaylist]: "รายการเพลงว่างเปล่า",
 	[Key.musicErrorSourceUnavailable]: "ไม่สามารถเล่นเพลงนี้ได้",
@@ -246,7 +277,9 @@ export const th: Translation = {
 	[Key.randomReadingSubtitle]: "คัดเลือกจากบทความอื่นด้วยเกณฑ์ที่คงที่",
 	[Key.copySuccess]: "คัดลอกไปยังคลิปบอร์ดแล้ว",
 	[Key.copyLink]: "คัดลอกลิงก์",
+	[Key.copySelection]: "คัดลอก",
 	[Key.copyFailed]: "คัดลอกลิงก์ไม่สำเร็จ โปรดคัดลอกด้วยตนเอง",
+	[Key.sharePageLink]: "แชร์ลิงก์หน้า",
 
 	[Key.shareArticle]: "แชร์บทความ",
 	[Key.shareArticleDescription]: "สร้างรูปภาพแชร์หรือคัดลอกลิงก์เพื่อส่งต่อบทความนี้",
@@ -258,6 +291,9 @@ export const th: Translation = {
 	[Key.retry]: "ลองอีกครั้ง",
 	[Key.backToTop]: "กลับไปด้านบน",
 	[Key.backToComment]: "ไปยังความคิดเห็น",
+	[Key.notFound]: "404",
+	[Key.notFoundTitle]: "หน้านี้หลงทางแล้ว",
+	[Key.notFoundDescription]: "อาจถูกย้าย เก็บถาวร หรือไม่เคยมีอยู่จริงเลยก็ได้",
 	[Key.backToHome]: "กลับหน้าแรก",
 	[Key.close]: "ปิด",
 	[Key.scanToRead]: "สแกนเพื่ออ่านบทความ",

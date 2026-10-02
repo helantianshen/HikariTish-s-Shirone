@@ -2,16 +2,17 @@
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
+import { url } from "@utils/url-utils";
 import type { AlbumIndexItem } from "@/types/album";
 
 let { album }: { album: AlbumIndexItem } = $props();
 </script>
 
 <article class="album-card">
-	<a class="album-card__link m3-state-layer" href={`/albums/${album.id}/`} aria-label={album.title}>
+	<a class="album-card__link m3-state-layer" href={url(`/albums/${album.id}/`)} aria-label={album.title}>
 		<div class="album-card__cover">
 			<img
-				src={album.cover}
+				src={album.cover ? url(album.cover) : ""}
 				alt={album.title}
 				loading="lazy"
 				decoding="async"
@@ -112,7 +113,7 @@ let { album }: { album: AlbumIndexItem } = $props();
 			width: 1.125rem
 			height: 1.125rem
 	&__body
-		padding: 1rem 1.125rem 1.125rem
+		padding: var(--m3e-space-4) var(--m3e-space-4)
 	&__title-row
 		display: flex
 		align-items: flex-start

@@ -1,6 +1,7 @@
 ---
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import { url } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
 import type { AlbumIndexItem } from "@/types/album";
 
@@ -9,11 +10,12 @@ interface Props {
 }
 
 const { album } = Astro.props;
-const imageSource = album.cover;
+const imageSource = album.cover ? url(album.cover) : "";
+const albumUrl = url(`/albums/${album.id}/`);
 ---
 
 <article class="album-card">
-	<a class="album-card__link" href={`/albums/${album.id}/`} aria-label={album.title}>
+	<a class="album-card__link" href={albumUrl} aria-label={album.title}>
 		<div class="album-card__cover">
 			<img
 				src={imageSource}
@@ -131,7 +133,7 @@ const imageSource = album.cover;
 			padding-inline: 0.5rem
 
 	&__body
-		padding: 1rem 1.125rem 1.125rem
+		padding: var(--m3e-space-4) var(--m3e-space-4)
 
 	&__title-row
 		display: flex
