@@ -7,8 +7,8 @@ import { expect, test } from "@playwright/test";
  * （loading → 淡出 → stagger 揭幕）；搜索即时过滤（每键收放，不闪加载器，与 MomentSection 分工一致），
  * 状态同步 URL（?group= / ?q=），刷新/分享/回退保留。
  * 分组标题与瓷砖均用站内既有语言（SectionTitle + card-bg 竖向卡），不引入额外装置。
- * 数据来自 src/data/compass.ts（本地数据源，8 组 / 55 条），
- * 站点入口按开发、学习、运维、魔法、前端、游戏、AI、工具分类。
+ * 数据来自 src/data/compass.ts（本地数据源，8 组 / 60 条），
+ * 站点入口按开发、学习、运维、魔法、前端、休闲、AI、工具分类。
  */
 
 const SHELF_KEYS = [
@@ -27,7 +27,7 @@ const SHELF_NAMES: Record<string, string> = {
 	ops: "运维",
 	magic: "魔法",
 	frontend: "前端",
-	games: "游戏",
+	games: "休闲",
 	ai: "AI",
 	tools: "工具",
 };
@@ -37,11 +37,11 @@ const SHELF_TILE_COUNTS: Record<string, number> = {
 	ops: 8,
 	magic: 3,
 	frontend: 8,
-	games: 2,
-	ai: 19,
+	games: 6,
+	ai: 20,
 	tools: 5,
 };
-const ENTRY_COUNT = 55;
+const ENTRY_COUNT = 60;
 
 test.describe("站点罗盘页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -82,13 +82,38 @@ test.describe("站点罗盘页", () => {
 		await expect(first.locator(".compass-tile__note")).toHaveText(
 			"Forge 1.20.x 入门文档",
 		);
-		// 42 个站点 logo 缓存为本地 PNG，其余 13 个使用本地 Iconify 分类图标。
+		// 46 个站点 logo 缓存为本地 PNG，其余 14 个使用本地 Iconify 分类图标。
 		await expect(first.locator(".compass-tile__icon img")).toHaveAttribute(
 			"src",
 			"/assets/compass/docs-minecraftforge-net-1f8497e3.png",
 		);
-		await expect(page.locator(".compass-tile__icon img")).toHaveCount(42);
-		await expect(page.locator(".compass-tile__icon svg")).toHaveCount(13);
+		await expect(page.locator(".compass-tile__icon img")).toHaveCount(46);
+		await expect(page.locator(".compass-tile__icon svg")).toHaveCount(14);
+		for (const label of [
+			"Oopz",
+			"巴哈姆特动画疯",
+			"牛番 OXFUN",
+			"黑白弹幕",
+			"Claude",
+		]) {
+			const image = page
+				.locator(".compass-tile")
+				.filter({
+					has: page.getByText(label, { exact: true }),
+				})
+				.locator(".compass-tile__icon img");
+			await expect(image).toBeVisible();
+			await image.scrollIntoViewIfNeeded();
+			await expect
+				.poll(() =>
+					image.evaluate(
+						(element) =>
+							(element as HTMLImageElement).complete &&
+							(element as HTMLImageElement).naturalWidth > 0,
+					),
+				)
+				.toBe(true);
+		}
 		await expect(page.locator(".compass-tile__letter")).toHaveCount(0);
 		// 每个分类同时在筛选 chip 与 SectionTitle 中显示本地图标。
 		await expect(
@@ -97,8 +122,33 @@ test.describe("站点罗盘页", () => {
 		await expect(page.locator(".section-title__icon svg")).toHaveCount(8);
 		// 计数行
 		await expect(page.locator(".compass-section__count")).toHaveText(
-			"55 个站点",
+			"60 个站点",
 		);
+		await expect(
+			page.getByText("开速云 - 仪表盘", { exact: true }),
+		).toHaveCount(0);
+		const liangxin = page.locator(".compass-tile").filter({
+			has: page.getByText("良心云", { exact: true }),
+		});
+		await expect(liangxin.locator(".compass-tile__note")).toHaveText(
+			"良心云服务仪表盘",
+		);
+		for (const [label, href] of [
+			["飞鸟云", "https://a1.170809.xyz/#/dashboard"],
+			["Oopz", "https://web.oopz.cn/"],
+			["巴哈姆特动画疯", "https://ani.gamer.com.tw/"],
+			["牛番 OXFUN", "https://nb.oxfun.app/"],
+			["黑白弹幕", "https://heibai7.com/"],
+			["Claude", "https://claude.ai/"],
+		]) {
+			const tile = page.locator(".compass-tile").filter({
+				has: page.getByText(label, { exact: true }),
+			});
+			await expect(tile.locator("a.compass-tile__link")).toHaveAttribute(
+				"href",
+				href,
+			);
+		}
 	});
 
 	test("分组筛选：chips 单选过滤（三段 Loading 过渡 + 再点取消恢复，URL ?group= 同步）", async ({

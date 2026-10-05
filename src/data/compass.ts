@@ -183,16 +183,16 @@ export const compassData: CompassShelf[] = [
 				note: "机场与线路推荐信息",
 			},
 			{
-				label: "良心云 - 仪表盘",
+				label: "良心云",
 				href: "https://xn--9kqz23b19z.com/#/dashboard",
 				icon: "material-symbols:encrypted-outline-rounded",
 				note: "良心云服务仪表盘",
 			},
 			{
-				label: "开速云 - 仪表盘",
-				href: "http://xksy.kshost.cn:30001/welcome",
-				image: "/assets/compass/xksy-kshost-cn-b087f317.png",
-				note: "开速云服务仪表盘",
+				label: "飞鸟云",
+				href: "https://a1.170809.xyz/#/dashboard",
+				icon: "fa6-solid:dove",
+				note: "飞鸟云服务仪表盘",
 			},
 		],
 	},
@@ -254,9 +254,9 @@ export const compassData: CompassShelf[] = [
 	},
 	{
 		key: "games",
-		name: "游戏",
+		name: "休闲",
 		icon: "material-symbols:sports-esports-outline-rounded",
-		blurb: "游戏与休闲内容入口",
+		blurb: "游戏、语音、漫画与追番入口",
 		entries: [
 			{
 				label: "蒸汽游戏宝库",
@@ -269,6 +269,30 @@ export const compassData: CompassShelf[] = [
 				href: "https://cn.baozimhcn.com/",
 				image: "/assets/compass/cn-baozimhcn-com-86efb2b5.png",
 				note: "漫画阅读入口",
+			},
+			{
+				label: "Oopz",
+				href: "https://web.oopz.cn/",
+				image: "/assets/compass/web-oopz-cn-86249cfd.png",
+				note: "Oopz 网页端语音交流入口",
+			},
+			{
+				label: "巴哈姆特动画疯",
+				href: "https://ani.gamer.com.tw/",
+				image: "/assets/compass/ani-gamer-com-tw-9c815e5e.png",
+				note: "动画观看与追番入口",
+			},
+			{
+				label: "牛番 OXFUN",
+				href: "https://nb.oxfun.app/",
+				image: "/assets/compass/nb-oxfun-app-634056df.png",
+				note: "动画观看与追番入口",
+			},
+			{
+				label: "黑白弹幕",
+				href: "https://heibai7.com/",
+				image: "/assets/compass/heibai7-com-f6a273de.png",
+				note: "动画观看与追番入口",
 			},
 		],
 	},
@@ -295,6 +319,12 @@ export const compassData: CompassShelf[] = [
 				href: "https://chatgpt.com/",
 				image: "/assets/compass/chatgpt-com-5d9354f7.png",
 				note: "ChatGPT 对话应用",
+			},
+			{
+				label: "Claude",
+				href: "https://claude.ai/",
+				image: "/assets/compass/claude-ai-4c128237.png",
+				note: "Claude 对话应用",
 			},
 			{
 				label: "OpenCode",

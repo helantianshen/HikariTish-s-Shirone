@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-const PROJECT_COUNT = 8;
+const PROJECT_COUNT = 11;
 const PROJECT_KEYS = [
+	"gateway",
 	"gantry",
 	"oss-sync",
 	"cmp",
 	"mcpp",
+	"xim-index",
+	"mcpp-index",
 	"fish-breeding-manager",
 	"jianjia-nexus-website",
 	"novagate",
@@ -25,7 +28,7 @@ test.describe("项目页", () => {
 		);
 		await expect(page.locator(".page-header__title")).toHaveText("项目");
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"8 个项目",
+			"11 个项目",
 		);
 
 		const projectOrder = await page
@@ -34,6 +37,17 @@ test.describe("项目页", () => {
 				cards.map((card) => card.getAttribute("data-project")),
 			);
 		expect(projectOrder).toEqual(PROJECT_KEYS);
+
+		const gateway = page.locator('[data-project="gateway"]');
+		await expect(gateway.locator("h2")).toHaveText("Gateway");
+		await expect(gateway.locator(".project-card__cover img")).toHaveAttribute(
+			"src",
+			"/assets/projects/gateway.png",
+		);
+		await expect(gateway).toHaveClass(/project-card--featured/);
+		await expect(
+			gateway.getByRole("link", { name: "查看源码" }),
+		).toHaveAttribute("href", "https://github.com/helantianshen/Gateway");
 
 		const gantry = page.locator('[data-project="gantry"]');
 		await expect(gantry.locator("h2")).toHaveText("Gantry");
@@ -59,7 +73,7 @@ test.describe("项目页", () => {
 
 		const cmp = page.locator('[data-project="cmp"]');
 		await expect(cmp.locator(".project-card__icon")).toBeVisible();
-		await expect(cmp.locator('[data-phase="building"]')).toHaveText("构建中");
+		await expect(cmp.locator('[data-phase="shipped"]')).toHaveText("已发布");
 		await expect(cmp.getByRole("link", { name: "查看源码" })).toHaveAttribute(
 			"href",
 			"https://github.com/mcpplibs/cmp",
@@ -86,11 +100,22 @@ test.describe("项目页", () => {
 		await expect(
 			fishBreedingManager.locator(".project-card__cover img"),
 		).toHaveAttribute("src", "/assets/projects/fish-breeding-manager.webp");
+		await expect(fishBreedingManager).toContainText("v0.2.0 预览版");
+		for (const [key, repository] of [
+			["xim-index", "https://github.com/openxlings/xim-pkgindex"],
+			["mcpp-index", "https://github.com/mcpplibs/mcpp-index"],
+		]) {
+			await expect(
+				page
+					.locator(`[data-project="${key}"]`)
+					.getByRole("link", { name: "查看源码" }),
+			).toHaveAttribute("href", repository);
+		}
 	});
 
 	test("无封面项目卡片都渲染可见图标", async ({ page }) => {
 		await expect(page.locator(".project-card__icon svg")).toHaveCount(
-			PROJECT_COUNT - 3,
+			PROJECT_COUNT - 4,
 		);
 	});
 
@@ -111,9 +136,9 @@ test.describe("项目页", () => {
 		await expect(
 			page.locator(".projects-section__loading .m3-loading--contained"),
 		).toBeVisible();
-		await expect(page.locator(".project-card")).toHaveCount(2);
+		await expect(page.locator(".project-card")).toHaveCount(3);
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"2 个项目",
+			"3 个项目",
 		);
 		await expect(page.locator('[data-project="gantry"]')).toHaveCount(0);
 		await expect(page.locator('[data-project="cmp"]')).toBeVisible();
@@ -219,7 +244,7 @@ test.describe("项目页", () => {
 		await page.setViewportSize({ width: 1280, height: 900 });
 		const cards = page.locator(".project-card--without-cover");
 
-		await expect(cards).toHaveCount(PROJECT_COUNT - 3);
+		await expect(cards).toHaveCount(PROJECT_COUNT - 4);
 
 		const rowsMerged = await cards.evaluateAll((elements) =>
 			elements.every((element) => {
