@@ -26,8 +26,6 @@ lang: zh_CN
 
 这里 `Tokio` 只是字符串内容，这个例子没有使用 Tokio 运行时，属于标准库初始化模块。
 
-示例源文件：`examples/initialization/once_lazy.rs`。
-
 ```rust
 use std::sync::{LazyLock, OnceLock};
 

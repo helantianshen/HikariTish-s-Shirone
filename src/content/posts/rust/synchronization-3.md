@@ -26,8 +26,6 @@ lang: zh_CN
 
 源码保留了“持锁 panic”的实验说明和 panic 文本，不能只按文字推断结果。这里观察的关键是守卫实际何时释放。
 
-示例源文件：`examples/synchronization/mutex_poison.rs`。
-
 ```rust
 use std::sync::{Arc, Mutex};
 use std::thread;

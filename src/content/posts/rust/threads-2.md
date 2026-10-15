@@ -26,8 +26,6 @@ lang: zh_CN
 
 第一个线程借用 `numbers` 读取，第二个线程读取 `numbers` 并独占借用 `total` 写入总和。离开 `scope` 后，可以继续使用这些局部变量，结果为 60。
 
-示例源文件：`examples/threads/thread_scope.rs`。
-
 ```rust
 use std::thread;
 
@@ -75,8 +73,6 @@ cargo run --example thread_scope
 `numbers.split_at_mut(2)` 返回 `[1, 2]` 与 `[3, 4]` 的两个可变切片。它们借用同一个数组中的不同区域，没有复制元素。
 
 两个线程分别修改两段数据：左段乘 10，右段乘 100。由于写入区域互不重叠，可以依靠借用规则证明安全，无需互斥锁。
-
-示例源文件：`examples/threads/thread_split.rs`。
 
 ```rust
 use std::thread;
@@ -129,8 +125,6 @@ cargo run --example thread_split
 两个作用域线程分别计算前半段与后半段的和，返回 3 和 7。主线程对两个句柄执行 `join()`，再合并成 10。
 
 这里只有共享读取，每个线程的局部计算独立，最终通过返回值汇总，没有共享可变计数器。
-
-示例源文件：`examples/threads/thread_sum.rs`。
 
 ```rust
 use std::thread;

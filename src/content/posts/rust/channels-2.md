@@ -26,8 +26,6 @@ lang: zh_CN
 
 最后发送 `最后一条` 再释放发送端。由于缓冲里还有消息，这次 `recv_timeout` 返回 `Ok("最后一条")`，不会立即报告断开。
 
-示例源文件：`examples/channels/channel_timeout.rs`。
-
 ```rust
 use std::sync::mpsc;
 use std::sync::mpsc::RecvTimeoutError;
@@ -78,8 +76,6 @@ cargo run --example channel_timeout
 `Message::Add(i32)` 表示累加任务，`Message::Stop` 表示业务停止请求。工作线程独占 `total`，依次处理 10 和 20，遇到 `Stop` 后退出循环，返回 30。
 
 同一个发送端按顺序发送，所以本例的两个累加先于停止被接收。这个顺序不代表来自不同发送线程的所有消息有预定的全局顺序。
-
-示例源文件：`examples/channels/worker_basic.rs`。
 
 ```rust
 use std::sync::mpsc;

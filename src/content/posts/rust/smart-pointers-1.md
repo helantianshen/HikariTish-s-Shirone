@@ -26,8 +26,6 @@ lang: zh_CN
 
 这里第一个 `Node` 是局部值，第二个节点由 `Box` 管理。`Box` 不等于共享所有权：将它赋给另一个变量通常会移动所有权，原变量不能继续使用。离开作用域时，节点和其拥有的后继节点会被依次释放。
 
-示例源文件：`examples/smart_pointers/box_basic.rs`。
-
 ```rust
 struct Node {
     value: i32,
@@ -76,8 +74,6 @@ cargo run --example box_basic
 
 本例依次展示计数 1 → 2 → 1。`drop(first)` 消耗的是一个句柄；`second` 仍然持有强引用，所以数据还在。最后一个强引用消失时，内部值才会释放。
 
-示例源文件：`examples/smart_pointers/rc_basic.rs`。
-
 ```rust
 use std::rc::Rc;
 
@@ -125,8 +121,6 @@ second: hello
 `let mut text` 只允许可变借用或重新赋值这个句柄，不会让共享数据自动可变。`Rc::get_mut(&mut text)` 返回 `Option<&mut String>`，由它判断当前是否能独占内部值。
 
 第一次没有其他引用，得到 `Some`，追加 ` rust`；创建 `other` 后得到 `None`；释放 `other` 后又能追加 `!`。
-
-示例源文件：`examples/smart_pointers/rc_get_mut.rs`。
 
 ```rust
 use std::rc::Rc;

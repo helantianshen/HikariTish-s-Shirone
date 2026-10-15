@@ -26,8 +26,6 @@ lang: zh_CN
 
 `borrow_mut()` 返回可变借用守卫 `RefMut`，通过解引用将 10 改为 15。内层作用域结束后守卫释放，随后 `borrow()` 才能安全获取不可变借用。
 
-示例源文件：`examples/smart_pointers/rc_refcell.rs`。
-
 ```rust
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -71,8 +69,6 @@ second: 15
 `Rc::downgrade(&owner)` 创建弱引用，不增加强引用计数。`upgrade()` 返回 `Option<Rc<T>>`：值仍存活时得到一个新的强引用，否则返回 `None`。
 
 当前示例在释放 `owner` 前，先将升级结果保存到 `keeper`。因此 `drop(owner)` 后仍然打印 `释放后: hello`，不是 `数据已经释放`。
-
-示例源文件：`examples/smart_pointers/weak_basic.rs`。
 
 ```rust
 use std::rc::Rc;
@@ -129,8 +125,6 @@ keeper: hello
 
 当前代码随后执行 `*node.next.borrow_mut() = None`，先移除内部强引用，再 `drop(node)`。因此本次运行会打印 `Node 已释放`，不会留下循环引用泄漏。
 
-示例源文件：`examples/smart_pointers/rc_cycle.rs`。
-
 ```rust
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -186,8 +180,6 @@ main 结束
 这里 `next` 保存 `Weak<Node>`，节点指向自己时只增加弱引用计数。单纯存在这条反向引用，不会阻止内部值释放。
 
 不过代码又通过 `upgrade()` 创建了 `keeper`，所以 `drop(node)` 后节点仍然存在；直到 `drop(keeper)` 才打印 `Node 已释放`。
-
-示例源文件：`examples/smart_pointers/weak_cycle.rs`。
 
 ```rust
 use std::cell::RefCell;

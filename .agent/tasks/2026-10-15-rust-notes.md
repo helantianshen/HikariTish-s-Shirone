@@ -11,5 +11,9 @@
 - 浏览器：12 篇均返回 200，标题、日期、正文和系列块核对通过；已有 a11y 的文章页与系列索引明暗主题 4 项通过；新导入 RefCell / Weak 文章的明暗主题 axe 检查 2 项通过；系列到文章和篇间链接的 Swup 导航通过（等待内容替换后断言）
 - 构建提示：空 moments 集合与不存在的 src/icons 目录警告；Pagefind 对 zh-cn 不做词干匹配，均未阻断构建
 - 发布授权：用户已明确允许提交并推送 main，继续发布
-- 待完成：提交、推送与真实托管平台发布后的线上验收。提交前 origin/main 与本地 HEAD 同为 d0de222；GitHub 未返回现有部署记录或托管平台状态
+- 首次推送：22dafc8 已推送 origin/main；远端 CI 已触发；GitHub 未返回托管平台部署记录，线上发布尚未确认
+- 后续调整：用户明确要求删除博客笔记全部“示例源文件：……”行并再次推送；已从 12 篇删除 28 行及对应空行，代码块和 frontmatter 保持一致
 - 日志：`/tmp/shirone-rust-check.log`、`/tmp/shirone-rust-build.log`、`/tmp/shirone-rust-a11y.log`
+
+- 后续验证：删除后 Astro check 再次通过，279 文件 0 errors / 0 warnings / 0 hints；diff 检查通过；原始笔记目录未修改
+- 远端 CI：首次提交 22dafc8 的运行 38756308077 失败，417 项单测中 4 项失败，集中在 tests/content/imported-notes.test.mjs 的固定文章数量、旧文章正文与标签断言；本次按用户要求仅清理源文件说明，不扩展修改这些测试

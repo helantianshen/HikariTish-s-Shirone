@@ -26,8 +26,6 @@ lang: zh_CN
 
 `lock()` 成功时返回 `MutexGuard`；通过守卫访问数据，守卫释放时自动解锁。本例每次循环结束都会释放这次取得的守卫。
 
-示例源文件：`examples/synchronization/arc_mutex.rs`。
-
 ```rust
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -77,8 +75,6 @@ cargo run --example arc_mutex
 `RwLock` 允许多个读锁同时存在，写锁与其他读写锁互斥。示例先让两个线程读取 10，作用域结束后再独占写入 15。
 
 后半段刻意持有 `reader`，调用非阻塞的 `try_write()`。当前无法独占，因此返回 `WouldBlock`；释放读守卫后再尝试即可成功。
-
-示例源文件：`examples/synchronization/rwlock_basic.rs`。
 
 ```rust
 use std::sync::RwLock;

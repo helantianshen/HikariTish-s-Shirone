@@ -26,8 +26,6 @@ lang: zh_CN
 
 当前 `divisor = 0` 时闭包正常返回 `Err("除数不能为零")`，最终进入 `Ok(Err(error))` 分支，线程本身没有 panic。
 
-示例源文件：`examples/threads/thread_result.rs`。
-
 ```rust
 use std::thread;
 

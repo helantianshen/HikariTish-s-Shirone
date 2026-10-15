@@ -26,8 +26,6 @@ lang: zh_CN
 
 `recv()` 会在暂时没有消息时等待。所有发送端释放且缓冲区没有剩余消息时，接收才返回断开错误。
 
-示例源文件：`examples/channels/channel_basic.rs`。
-
 ```rust
 use std::sync::mpsc;
 use std::thread;
@@ -76,8 +74,6 @@ cargo run --example channel_basic
 克隆发送端，让两个线程往同一个接收端发送消息。这里每个生产者只发送一条，不同线程之间的接收顺序没有固定保证。
 
 `for message in receiver` 会不断接收，直到所有发送端消失且剩余消息处理完。本例两个发送端分别随子线程结束而释放，因此循环能够退出。
-
-示例源文件：`examples/channels/channel_multi.rs`。
 
 ```rust
 use std::sync::mpsc;
@@ -131,8 +127,6 @@ cargo run --example channel_multi
 容量为 1 时，通道最多缓存一条待接收消息。缓存满时，后续 `send()` 会阻塞，直到有空位，或者接收端断开。
 
 背压让生产者感知消费者的处理节奏。不过“第二条发送完成”和接收日志的先后仍不固定，因为日志语句与消息交接不是同一个操作。
-
-示例源文件：`examples/channels/channel_bounded.rs`。
 
 ```rust
 use std::sync::mpsc;

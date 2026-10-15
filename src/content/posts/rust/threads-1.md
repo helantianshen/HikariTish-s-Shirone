@@ -26,8 +26,6 @@ lang: zh_CN
 
 子线程打印字符串并返回长度，`join()` 等待线程结束，`unwrap()` 从成功结果中取出 5。源码最后一行虽然写着 `子线程收到`，打印的实际是返回的长度。
 
-示例源文件：`examples/threads/thread_basic.rs`。
-
 ```rust
 use std::thread;
 
@@ -73,8 +71,6 @@ cargo run --example thread_basic
 
 本次运行只看到主线程的两条日志，但这不是固定输出：子线程可能来得及开始执行。不能把某次未打印子线程日志理解为 `spawn` 没有启动线程。
 
-示例源文件：`examples/threads/thread_join.rs`。
-
 ```rust
 use std::thread;
 use std::time::Duration;
@@ -118,8 +114,6 @@ cargo run --example thread_join
 
 此处没有跨线程同时访问同一个 `RefCell`，因此它不需要具备 `Sync`。
 
-示例源文件：`examples/threads/send_basic.rs`。
-
 ```rust
 use std::cell::RefCell;
 use std::thread;
@@ -161,8 +155,6 @@ cargo run --example send_basic
 `T: Sync` 的含义是 `&T: Send`。示例用空泛型函数给编译器施加约束，验证 `RefCell<i32>` 可以转移，而 `Mutex<i32>`、`Arc<Mutex<i32>>` 满足相应的共享约束。
 
 这些函数没有运行时输出，重点是类型检查能否通过。
-
-示例源文件：`examples/threads/send_sync.rs`。
 
 ```rust
 use std::cell::RefCell;

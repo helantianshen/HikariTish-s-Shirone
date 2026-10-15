@@ -26,8 +26,6 @@ lang: zh_CN
 
 `fetch_add` 返回加一前的旧值，本例没有使用该返回值。
 
-示例源文件：`examples/synchronization/atomic_basic.rs`。
-
 ```rust
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
@@ -77,8 +75,6 @@ cargo run --example atomic_basic
 屏障创建为 `Barrier::new(3)`，三个线程分别完成准备后调用 `wait()`。本轮三次到达完成之前，任何线程都不能越过屏障打印“开始工作”。
 
 准备日志内部、工作日志内部的线程编号顺序都不固定；屏障保证的是阶段关系。
-
-示例源文件：`examples/synchronization/barrier_basic.rs`。
 
 ```rust
 use std::sync::Barrier;
@@ -132,8 +128,6 @@ cargo run --example barrier_basic
 `Mutex<bool>` 保存是否准备好的事实，`Condvar` 负责等待和通知。子线程持锁检查条件，不满足时调用 `wait()`；它在等待时释放锁，被唤醒后重新获取锁，返回新的守卫。
 
 主线程持锁把状态改成 `true`，释放锁后通知。子线程通过检查后释放守卫，开始工作。
-
-示例源文件：`examples/synchronization/condvar_basic.rs`。
 
 ```rust
 use std::sync::{Condvar, Mutex};

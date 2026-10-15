@@ -26,8 +26,6 @@ lang: zh_CN
 
 子线程获得 `worker_message`，主线程保留 `message`。两边都能读取同一字符串；`join()` 得到子线程返回的长度 5。等待结束后子线程句柄已释放，剩余强引用为 1。
 
-示例源文件：`examples/smart_pointers/arc_basic.rs`。
-
 ```rust
 use std::sync::Arc;
 use std::thread;
