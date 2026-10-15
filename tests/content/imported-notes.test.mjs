@@ -7,6 +7,18 @@ import YAML from "yaml";
 
 const projectRoot = path.resolve(import.meta.dirname, "../..");
 const postsRoot = path.join(projectRoot, "src/content/posts");
+// Obsidian 导入验收覆盖原始九个目录，独立系列不属于该批次
+const importedPostDirectories = [
+	"ai-workstation",
+	"docker",
+	"gin",
+	"go",
+	"go-performance",
+	"gorm",
+	"linux",
+	"mysql",
+	"redis",
+];
 const importUtilsUrl = pathToFileURL(
 	path.join(projectRoot, "scripts/content/import-utils.mjs"),
 ).href;
@@ -56,6 +68,15 @@ async function collectMarkdownFiles(directory) {
 		if (entry.isFile() && /\.mdx?$/i.test(entry.name)) files.push(fullPath);
 	}
 	return files;
+}
+
+async function collectImportedMarkdownFiles() {
+	const files = await Promise.all(
+		importedPostDirectories.map((directory) =>
+			collectMarkdownFiles(path.join(postsRoot, directory)),
+		),
+	);
+	return files.flat();
 }
 
 function parsePost(source) {
@@ -113,8 +134,8 @@ describe("Obsidian 笔记导入结果", () => {
 		assert.equal(description, "调试示例 api_key='REDACTED_SECRET'");
 	});
 
-	it("每篇文章使用切合内容的独立摘要", async () => {
-		const files = await collectMarkdownFiles(postsRoot);
+	it("每篇导入文章使用切合内容的独立摘要", async () => {
+		const files = await collectImportedMarkdownFiles();
 		const descriptionsByTitle = new Map();
 
 		for (const file of files) {
@@ -162,13 +183,14 @@ describe("Obsidian 笔记导入结果", () => {
 		assert.doesNotMatch(asyncAwaitPost.body, /^#\s+从 Channel 到 Future/m);
 	});
 
-	it("只包含排除资产平台管理和 Eino 后的 57 篇文章", async () => {
-		const files = await collectMarkdownFiles(postsRoot);
+	it("Obsidian 导入目录保留排除资产平台管理和 Eino 后的 57 篇文章", async () => {
+		const files = await collectImportedMarkdownFiles();
 		assert.equal(files.length, 57);
 
 		const categoryCounts = new Map();
 		for (const file of files) {
-			const { data } = parsePost(await readFile(file, "utf8"));
+			const source = await readFile(file, "utf8");
+			const { data } = parsePost(source);
 			categoryCounts.set(
 				data.category,
 				(categoryCounts.get(data.category) ?? 0) + 1,
@@ -176,6 +198,7 @@ describe("Obsidian 笔记导入结果", () => {
 			assert.doesNotMatch(file, /资产平台管理|[\\/]eino[\\/]/i);
 			assert.notEqual(data.category, "资产平台管理");
 			assert.notEqual(data.category, "Eino");
+			assert.doesNotMatch(source, /!??\[\[[^\]]+\]\]/);
 		}
 
 		assert.deepEqual(categoryCounts, expectedCategories);
@@ -187,7 +210,6 @@ describe("Obsidian 笔记导入结果", () => {
 		for (const file of files) {
 			const source = await readFile(file, "utf8");
 			const { data } = parsePost(source);
-			assert.doesNotMatch(source, /!??\[\[[^\]]+\]\]/);
 			for (const pattern of potentialSecretPatterns) {
 				assert.doesNotMatch(source, pattern);
 			}
@@ -204,7 +226,7 @@ describe("Obsidian 笔记导入结果", () => {
 	});
 
 	it("使用精简且统一的技术栈与主题标签", async () => {
-		const files = await collectMarkdownFiles(postsRoot);
+		const files = await collectImportedMarkdownFiles();
 		const tagsByTitle = new Map();
 		const allTags = new Set();
 
