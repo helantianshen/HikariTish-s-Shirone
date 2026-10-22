@@ -63,7 +63,7 @@
 		"compass:icons": "node scripts/compass/cache-site-icons.mjs --refresh"
 	},
 	"dependencies": {
-		"@astrojs/check": "^0.9.10",
+		"@astrojs/check": "^0.9.11",
 		"@astrojs/markdown-remark": "^7.3.3",
 		"@astrojs/mdx": "^8.0.3",
 		"@astrojs/rss": "^4.0.19",
