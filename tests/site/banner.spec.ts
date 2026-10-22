@@ -325,6 +325,44 @@ test.describe("banner wallpaper", () => {
 		expect(html).not.toContain("/assets/banner/desktop/1.webp");
 	});
 
+	test("detaches initial picture sources on dark desktop and mobile entries", async ({
+		page,
+	}) => {
+		await page.addInitScript(() => localStorage.setItem("theme", "dark"));
+		for (const viewport of [
+			{ width: 1440, height: 1000 },
+			{ width: 390, height: 844 },
+		]) {
+			await page.setViewportSize(viewport);
+			await page.goto("/", { waitUntil: "domcontentloaded" });
+			await waitForBannerState(page, true);
+			await expect(
+				page.locator(".banner-stage__media picture source"),
+			).toHaveCount(0);
+		}
+	});
+
+	test("detaches initial picture sources after a runtime theme switch", async ({
+		page,
+	}) => {
+		await page.goto("/", { waitUntil: "domcontentloaded" });
+		await waitForBannerState(page, true);
+		await expect(
+			page.locator(".banner-stage__media picture source"),
+		).not.toHaveCount(0);
+		await page.evaluate(() => {
+			document.documentElement.classList.add("dark");
+			window.dispatchEvent(
+				new CustomEvent("shirone:theme-change", {
+					detail: { isDark: true },
+				}),
+			);
+		});
+		await expect(
+			page.locator(".banner-stage__media picture source"),
+		).toHaveCount(0);
+	});
+
 	test("desktop exposes subtitle typewriter controls", async ({ page }) => {
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
@@ -668,22 +706,23 @@ test.describe("banner wallpaper", () => {
 				window as typeof window & { __swupPersistenceProbe?: string }
 			).__swupPersistenceProbe = "preserved";
 		});
-		await page
-			.locator(
-				'#swup-container a.m3-blog-postcard__title[href="/posts/go/从-channel-到-future-用-go-实现-async-await-模型/"]',
-			)
-			.click();
+		// 使用首页当前可见文章，发布新内容后仍可验证横幅与文章标题同步
+		const article = page
+			.locator("#swup-container a.m3-blog-postcard__title")
+			.first();
+		const articleTitle = (await article.innerText()).trim();
+		await article.click();
 		await page.waitForFunction(
 			() =>
 				document.getElementById("swup-container")?.dataset.currentPage ===
 				"post",
 		);
 		await expect(page.locator("[data-banner-context-title]")).toHaveText(
-			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+			articleTitle,
 		);
 		await expect(page.locator("#banner-wrapper")).toHaveAttribute(
 			"aria-label",
-			"从 Channel 到 Future：用 Go 实现 Async/Await 模型",
+			articleTitle,
 		);
 		expect(
 			await page.evaluate(

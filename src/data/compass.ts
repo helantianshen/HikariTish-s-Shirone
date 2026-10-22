@@ -191,7 +191,7 @@ export const compassData: CompassShelf[] = [
 			{
 				label: "飞鸟云",
 				href: "https://a1.170809.xyz/#/dashboard",
-				icon: "fa6-solid:dove",
+				icon: "fa7-solid:dove",
 				note: "飞鸟云服务仪表盘",
 			},
 		],

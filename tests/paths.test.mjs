@@ -9,7 +9,7 @@ import {
 	findPackageRoot,
 	normalisePath,
 	resolvePaths,
-} from "../src/integration/paths.ts";
+} from "../src/integration/resolve/paths.ts";
 
 // Two throwaway trees: the theme checkout (has `src/`) and a user's site.
 const themeRoot = mkdtempSync(join(tmpdir(), "shirones-theme-"));
@@ -148,7 +148,9 @@ test("the repository comparison ignores the trailing slash config.root carries",
 // ── The gate that used to misfire for a linked install ──────────────────────
 import { prebundleCandidates } from "../src/integration/index.ts";
 
-const SPECIFIERS = ["@swup/astro", "astro-icon", "stylus"];
+// `@iconify/svelte` stands where `astro-icon` did before the theme generated
+// its own icon collection.
+const SPECIFIERS = ["@swup/astro", "@iconify/svelte", "stylus"];
 
 test("pre-bundles the theme's own dependencies inside its repository", () => {
 	const paths = resolvePaths(

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 const GITHUB_MOCK = {
 	description: "A static blog template built with Astro.",
@@ -11,6 +11,55 @@ const GITHUB_MOCK = {
 	},
 	license: { spdx_id: "MIT" },
 };
+
+async function applyTheme(page: Page, theme: string) {
+	await page.evaluate((value) => localStorage.setItem("theme", value), theme);
+	await page.reload();
+	await expect(page.locator("html")).toHaveClass(
+		theme === "dark" ? /\bdark\b/ : /^(?!.*\bdark\b)/,
+	);
+	await page.waitForFunction(() =>
+		document.documentElement.style
+			.getPropertyValue("--mc-primary")
+			.startsWith("#"),
+	);
+}
+
+/** WCAG contrast ratio between an element's background and its card's. */
+async function contrastWithCard(locator: Locator) {
+	await locator.scrollIntoViewIfNeeded();
+	return locator.evaluate(async (element) => {
+		const card = element.closest(".m3-card");
+		if (!card) throw new Error("The element must sit on a card");
+		await Promise.all(
+			[...element.getAnimations(), ...card.getAnimations()].map((animation) =>
+				animation.finished.catch(() => undefined),
+			),
+		);
+		const context = document
+			.createElement("canvas")
+			.getContext("2d", { willReadFrequently: true });
+		if (!context) throw new Error("Canvas 2D is unavailable");
+		const luminance = (color: string) => {
+			context.clearRect(0, 0, 1, 1);
+			context.fillStyle = color;
+			context.fillRect(0, 0, 1, 1);
+			const [r, g, b] = [...context.getImageData(0, 0, 1, 1).data].map(
+				(channel) => {
+					const value = channel / 255;
+					return value <= 0.04045
+						? value / 12.92
+						: ((value + 0.055) / 1.055) ** 2.4;
+				},
+			);
+			return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+		};
+		const [fill, host] = [element, card].map((node) =>
+			luminance(getComputedStyle(node).backgroundColor),
+		);
+		return (Math.max(fill, host) + 0.05) / (Math.min(fill, host) + 0.05);
+	});
+}
 
 test.describe("MDX Support and M3E Integration", () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
@@ -32,7 +81,11 @@ test.describe("MDX Support and M3E Integration", () => {
 		await page.waitForTimeout(600);
 
 		// 验证标题与元数据
-		const title = page.locator("#post-container [data-pagefind-meta='title']");
+		// `#post-container` no longer exists; the article body is wrapped in
+		// `#content-wrapper`.
+		const title = page.locator(
+			"#content-wrapper [data-pagefind-meta='title']",
+		);
 		await expect(title).toContainText(
 			"MDX Integration and M3E Atomic Components",
 		);
@@ -70,7 +123,7 @@ test.describe("MDX Support and M3E Integration", () => {
 		await expect(textFields.first()).toBeVisible();
 
 		const switchInput = page
-			.locator("#post-container .m3-switch__input")
+			.locator("#swup-container .m3-switch__input")
 			.first();
 		await switchInput.scrollIntoViewIfNeeded();
 		await page.waitForTimeout(300);
@@ -106,7 +159,8 @@ test.describe("MDX Support and M3E Integration", () => {
 	test("Swup client-side navigation smoothly loads MDX post and hydrates islands", async ({
 		page,
 	}) => {
-		await page.goto("/", { waitUntil: "networkidle" });
+		// 该文章已不在首页列表里；/archive/ 是唯一稳定列出它的入口。
+		await page.goto("/archive/", { waitUntil: "networkidle" });
 		await page.waitForTimeout(500);
 
 		// 点击跳转到 MDX 演示文章
@@ -120,7 +174,7 @@ test.describe("MDX Support and M3E Integration", () => {
 
 		// 验证文章正文与水合状态
 		const switchInput = page
-			.locator("#post-container .m3-switch__input")
+			.locator("#swup-container .m3-switch__input")
 			.first();
 		await switchInput.scrollIntoViewIfNeeded();
 		await page.waitForTimeout(400);
@@ -245,6 +299,34 @@ test.describe("MDX Support and M3E Integration", () => {
 				githubCard.evaluate((element) => getComputedStyle(element).boxShadow),
 			)
 			.not.toBe("none");
+	});
+
+	test("filled text field stays distinguishable from the article card in light and dark modes", async ({
+		page,
+	}) => {
+		await page.goto("/posts/mdx-showcase/");
+		const field = page.locator(".m3-text-field--filled").first();
+		for (const theme of ["light", "dark"]) {
+			await applyTheme(page, theme);
+			// Dark cards already use surface-container-high; container-highest is
+			// only ~1.08:1 above it in the 2025 scheme, which still reads as one surface.
+			expect(await contrastWithCard(field)).toBeGreaterThan(1.1);
+		}
+	});
+
+	test("inline code chips stay distinguishable from the article card in light and dark modes", async ({
+		page,
+	}) => {
+		await page.goto("/posts/mdx-showcase/");
+		const code = page
+			.getByRole("heading", { name: /Input Controls/ })
+			.locator("code");
+		for (const theme of ["light", "dark"]) {
+			await applyTheme(page, theme);
+			// Light chips sit ~1.10:1 against the white card; dark chips used to share
+			// surface-container-high with the card and read as bare text.
+			expect(await contrastWithCard(code)).toBeGreaterThan(1.05);
+		}
 	});
 
 	test("RSS feed contains cleaned MDX content without raw exports or JSX leaks", async ({

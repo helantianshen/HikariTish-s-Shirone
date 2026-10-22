@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 import {
 	expressiveCodeShared,
 	IMAGE_ENDPOINT_ROUTE,
-	iconInclude,
 	isMusicBundleFile,
 	MUSIC_SIDEBAR_VIRTUAL_ID,
 	svelteCompilerOptions,
@@ -72,23 +71,6 @@ describe("shared integrations config", () => {
 				!(key in swupOptions),
 				`${key} is in both swupOptions and swupForwardOptions`,
 			);
-		}
-	});
-
-	it("declares every icon collection the theme actually references", () => {
-		// 340 处图标引用里 material-symbols 占 308、simple-icons 占 21。漏了只
-		// 会在 pnpm 严格布局下暴露（源码模式有 astro-icon 的自动发现兜底）。
-		// 精确比对键集也顺带挡住了源码模式曾有的畸形键
-		// "preprocess: vitePreprocess(),"（从 svelte.config.js 误粘过来的）。
-		assert.deepEqual(Object.keys(iconInclude).sort(), [
-			"fa6-brands",
-			"fa6-regular",
-			"fa6-solid",
-			"material-symbols",
-			"simple-icons",
-		]);
-		for (const collections of Object.values(iconInclude)) {
-			assert.deepEqual(collections, ["*"]);
 		}
 	});
 

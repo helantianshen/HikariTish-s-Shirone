@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { registerPersistentShellSync } from "./feature-page";
 
 const PROJECT_COUNT = 11;
 const PROJECT_KEYS = [
@@ -164,7 +165,9 @@ test.describe("项目页", () => {
 	});
 
 	test("桌面与手机布局之间无刷新切换时重置瀑布流定位", async ({ page }) => {
-		await page.setViewportSize({ width: 1440, height: 900 });
+		// 网格是 auto-fill minmax(18rem, 1fr)：容器在 1280px 视口下只有 577px，
+		// 只够排 1 列。桌面多列分支需要 1600px（容器 848px）才成立。
+		await page.setViewportSize({ width: 1600, height: 900 });
 		const grid = page.locator(".projects-section__grid");
 		const cards = page.locator(".project-card");
 
@@ -225,7 +228,7 @@ test.describe("项目页", () => {
 		await expect(cards).toHaveCount(PROJECT_COUNT);
 		await expect(page).toHaveURL(/\/projects\/$/);
 
-		await page.setViewportSize({ width: 1440, height: 900 });
+		await page.setViewportSize({ width: 1600, height: 900 });
 
 		await expect
 			.poll(() =>
@@ -238,6 +241,60 @@ test.describe("项目页", () => {
 				),
 			)
 			.toBe(true);
+	});
+
+	// ≥md 的网格把行距烘焙进 span（grid-auto-rows: 8px + row-gap: 0），所以
+	// 单列时也必须写 span：只占一行 8px 的卡片会让下一张紧贴着叠上来。
+	// 1280px 视口下内容列只有 577px，只排得下一列——正是出问题的那个状态。
+	test("窄桌面单列下卡片不重叠", async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 900 });
+		const cards = page.locator(".project-card");
+
+		await expect
+			.poll(() =>
+				page
+					.locator(".projects-section__grid")
+					.evaluate(
+						(element) =>
+							getComputedStyle(element)
+								.gridTemplateColumns.split(" ")
+								.filter(Boolean).length,
+					),
+			)
+			.toBe(1);
+
+		// 网格已进入「行距烘焙进 span」的模式，这正是需要 span 的前提。
+		await expect
+			.poll(() =>
+				page
+					.locator(".projects-section__grid")
+					.evaluate((element) => getComputedStyle(element).gridAutoRows),
+			)
+			.not.toBe("auto");
+
+		await expect
+			.poll(() =>
+				cards.evaluateAll((elements) =>
+					elements.every(
+						(element) => (element as HTMLElement).style.gridRowEnd !== "",
+					),
+				),
+			)
+			.toBe(true);
+
+		// 逐对检查：后一张的顶边必须不早于前一张的底边。
+		const boxes = await cards.evaluateAll((elements) =>
+			elements.map((element) => {
+				const rect = element.getBoundingClientRect();
+				return { top: rect.top, bottom: rect.bottom };
+			}),
+		);
+		for (let index = 1; index < boxes.length; index += 1) {
+			expect(
+				boxes[index].top,
+				`第 ${index + 1} 张卡片叠到了第 ${index} 张上`,
+			).toBeGreaterThanOrEqual(boxes[index - 1].bottom);
+		}
 	});
 
 	test("无封面卡片在桌面端将技术栈与源码操作合并为同一行", async ({ page }) => {
@@ -271,24 +328,11 @@ test.describe("项目页", () => {
 test.describe("项目页 Swup 导航", () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
 
-	test("从持久顶栏进入后同步页面、导航与侧栏状态", async ({ page }) => {
-		await page.goto("/skills/", { waitUntil: "domcontentloaded" });
-		await page.getByRole("button", { name: "更多", exact: true }).click();
-		await page.locator('a[data-nav-key="projects"]').click();
-
-		await expect(page).toHaveURL(/\/projects\/$/);
-		await expect(page.locator("#swup-container")).toHaveAttribute(
-			"data-current-page",
-			"projects",
-		);
-		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
-		await expect(page.locator('a[data-nav-key="projects"]')).toHaveAttribute(
-			"aria-current",
-			"page",
-		);
-		await expect(
-			page.locator('widget-layout[data-id="categories"]'),
-		).toBeVisible();
-		await expect(page.locator('widget-layout[data-id="tags"]')).toBeVisible();
+	registerPersistentShellSync("从持久顶栏进入后同步页面、导航与侧栏状态", {
+		key: "projects",
+		fromPath: "/skills/",
+		toPath: /\/projects\/$/,
+		cardSelector: "project-card",
+		cardCount: PROJECT_COUNT,
 	});
 });

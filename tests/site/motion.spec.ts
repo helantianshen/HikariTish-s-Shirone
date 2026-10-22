@@ -297,6 +297,7 @@ test.describe("sidebar pages filter (swup sync)", () => {
 		});
 	}
 
+	/** 按统计行定位图标，并确认 SVG 自带路径而非外部引用 */
 	async function statsTagIconHasInlinePath(
 		page: import("@playwright/test").Page,
 	) {
@@ -304,10 +305,8 @@ test.describe("sidebar pages filter (swup sync)", () => {
 			const row = [...document.querySelectorAll(".m3-site-stats__row")].find(
 				(element) => element.textContent?.includes("标签"),
 			);
-			const icon = row?.querySelector(
-				'svg[data-icon="material-symbols:tag-rounded"]',
-			);
-			return !!icon?.querySelector("path");
+			const icon = row?.querySelector(".m3-meta-icon svg");
+			return !!icon?.querySelector("path[d]") && !icon.querySelector("use");
 		});
 	}
 

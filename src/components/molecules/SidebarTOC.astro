@@ -1,10 +1,10 @@
 ---
-import type { MarkdownHeading } from "astro";
 import TocList from "@components/atoms/blog/TocList.astro";
-import WidgetLayout from "./WidgetLayout.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import type { MarkdownHeading } from "astro";
 import { siteConfig } from "@/config/siteConfig";
+import WidgetLayout from "./WidgetLayout.astro";
 
 interface Props {
 	headings?: MarkdownHeading[];
@@ -55,6 +55,23 @@ const tocHeadings = headings.map((heading) => ({
 	padding-right: 0.125rem
 	scroll-padding-block: 0.25rem
 	scrollbar-width: thin
+	scrollbar-color: var(--scrollbar-bg) transparent
+
+	&::-webkit-scrollbar
+		width: var(--m3e-space-2)
+
+	&::-webkit-scrollbar-track
+		background: transparent
+
+	&::-webkit-scrollbar-thumb
+		background: var(--scrollbar-bg)
+		border-radius: var(--shape-corner-full)
+
+		&:hover
+			background: var(--scrollbar-bg-hover)
+
+		&:active
+			background: var(--scrollbar-bg-active)
 </style>
 
 <script>

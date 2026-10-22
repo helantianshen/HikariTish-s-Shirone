@@ -1,0 +1,3 @@
+# 显式关闭评论，使零开销回归独立于本站默认配置
+enable: false
+provider: none

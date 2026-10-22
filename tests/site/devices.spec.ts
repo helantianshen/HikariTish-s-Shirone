@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { registerPersistentShellSync } from "./feature-page";
 
 const DEVICE_COUNT = 5;
 
@@ -119,29 +120,67 @@ test.describe("设备展示页", () => {
 			page.getByRole("button", { name: "Audio & Visual", exact: true }),
 		).toHaveAttribute("aria-pressed", "true");
 	});
+
+	// 与 projects.spec.ts 同因：≥md 网格把 16px 行距烘焙进 span
+	// （grid-auto-rows: 8px + row-gap: 0），单列时不写 span 就会重叠。
+	test("窄桌面单列下卡片不重叠", async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 900 });
+		const cards = page.locator(".device-card");
+
+		await expect
+			.poll(() =>
+				page
+					.locator(".devices-section__grid")
+					.evaluate(
+						(element) =>
+							getComputedStyle(element)
+								.gridTemplateColumns.split(" ")
+								.filter(Boolean).length,
+					),
+			)
+			.toBe(1);
+
+		await expect
+			.poll(() =>
+				page
+					.locator(".devices-section__grid")
+					.evaluate((element) => getComputedStyle(element).gridAutoRows),
+			)
+			.not.toBe("auto");
+
+		await expect
+			.poll(() =>
+				cards.evaluateAll((elements) =>
+					elements.every(
+						(element) => (element as HTMLElement).style.gridRowEnd !== "",
+					),
+				),
+			)
+			.toBe(true);
+
+		const boxes = await cards.evaluateAll((elements) =>
+			elements.map((element) => {
+				const rect = element.getBoundingClientRect();
+				return { top: rect.top, bottom: rect.bottom };
+			}),
+		);
+		for (let index = 1; index < boxes.length; index += 1) {
+			expect(
+				boxes[index].top,
+				`第 ${index + 1} 张卡片叠到了第 ${index} 张上`,
+			).toBeGreaterThanOrEqual(boxes[index - 1].bottom);
+		}
+	});
 });
 
 test.describe("设备展示页 Swup 导航", () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
 
-	test("从持久顶栏进入后同步页面、导航与侧栏状态", async ({ page }) => {
-		await page.goto("/skills/", { waitUntil: "domcontentloaded" });
-		await page.getByRole("button", { name: "More", exact: true }).click();
-		await page.locator('a[data-nav-key="devices"]').click();
-
-		await expect(page).toHaveURL(/\/devices\/$/);
-		await expect(page.locator("#swup-container")).toHaveAttribute(
-			"data-current-page",
-			"devices",
-		);
-		await expect(page.locator(".device-card")).toHaveCount(DEVICE_COUNT);
-		await expect(page.locator('a[data-nav-key="devices"]')).toHaveAttribute(
-			"aria-current",
-			"page",
-		);
-		await expect(
-			page.locator('widget-layout[data-id="categories"]'),
-		).toBeVisible();
-		await expect(page.locator('widget-layout[data-id="tags"]')).toBeVisible();
+	registerPersistentShellSync("从持久顶栏进入后同步页面、导航与侧栏状态", {
+		key: "devices",
+		fromPath: "/skills/",
+		toPath: /\/devices\/$/,
+		cardSelector: "device-card",
+		cardCount: DEVICE_COUNT,
 	});
 });
