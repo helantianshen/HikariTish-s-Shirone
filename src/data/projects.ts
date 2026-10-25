@@ -54,6 +54,54 @@ export const projectsData: ProjectItem[] = [
 		year: "2026",
 	},
 	{
+		key: "fluxvault",
+		title: "FluxVault",
+		summary:
+			"多存储源文件托管服务，提供 Go 与 Hono Worker 双后端、React 管理台及统一的文件管理与访问控制，已实现 S3、GitHub Release 和 Telegram 存储适配器。",
+		category: "backend",
+		phase: "building",
+		technologies: ["Go", "TypeScript", "Hono", "React", "Cloudflare D1"],
+		icon: "material-symbols:cloud-upload-rounded",
+		repository: "https://github.com/helantianshen/FluxVault",
+		year: "2026",
+	},
+	{
+		key: "codex-bailong-desktop-pet",
+		title: "Codex 白龙桌宠",
+		summary:
+			"基于上游白龙桌宠进行 Linux/niri 与 KDE 适配，在桌面查看 Codex 任务状态、完成提醒、账户额度和 Token 用量，已发布 Linux 预览版。",
+		category: "productivity",
+		phase: "shipped",
+		technologies: ["Python", "PySide6", "Wayland", "niri", "KDE"],
+		icon: "material-symbols:pets-rounded",
+		repository: "https://github.com/helantianshen/codex-bailong-desktop-pet",
+		year: "2026",
+	},
+	{
+		key: "realmmesh-server",
+		title: "RealmMesh Server",
+		summary:
+			"RealmMesh 的 Go/Kratos 中心服务，提供玩家账户认证、服务器凭据管理、配置热更新、连接与操作审计，以及跨服共享物品仓库。",
+		category: "backend",
+		phase: "building",
+		technologies: ["Go", "Kratos", "gRPC", "PostgreSQL", "GORM"],
+		icon: "material-symbols:hub-rounded",
+		repository: "https://github.com/helantianshen/realmmesh-server",
+		year: "2026",
+	},
+	{
+		key: "realmmesh-mod",
+		title: "RealmMesh Mod",
+		summary:
+			"面向 Minecraft 1.21.1 的 NeoForge 模组，连接 RealmMesh 中心，提供玩家注册登录、未登录门禁、自助改密、审计上报和跨服共享物品仓库。",
+		category: "game",
+		phase: "building",
+		technologies: ["Java", "Minecraft", "NeoForge", "gRPC"],
+		icon: "material-symbols:sports-esports-rounded",
+		repository: "https://github.com/helantianshen/realmmesh-mod",
+		year: "2026",
+	},
+	{
 		key: "cmp",
 		title: "CMP",
 		summary:

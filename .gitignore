@@ -54,6 +54,16 @@ src/generated/local-icon-collections.ts
 src/data/anime-snapshots/*.json
 public/assets/anime/covers/*
 !public/assets/anime/covers/.gitkeep
+# Curated watchlist covers belong to the site content.
+!public/assets/anime/covers/angel-next-door-s2.webp
+!public/assets/anime/covers/clannad-s1.webp
+!public/assets/anime/covers/clannad-s2.webp
+!public/assets/anime/covers/my-dress-up-darling-s2.webp
+!public/assets/anime/covers/kuranika.webp
+!public/assets/anime/covers/kaoruhana.webp
+!public/assets/anime/covers/seiken-gakuin.webp
+!public/assets/anime/covers/mushoku-tensei-s2.webp
+!public/assets/anime/covers/mushoku-tensei-s3.webp
 
 # generated responsive moment thumbnails
 public/assets/moments/thumbnails/*

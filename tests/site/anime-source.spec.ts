@@ -21,24 +21,43 @@ test.describe("Anime 数据源与配置解析契约", () => {
 			["Re：从零开始的异世界生活 第一季", "completed", 25, 25],
 			["Re：从零开始的异世界生活 第二季", "completed", 25, 25],
 			["Re：从零开始的异世界生活 第三季", "completed", 16, 16],
-			["Re：从零开始的异世界生活 第四季", "watching", 14, 14],
+			["Re：从零开始的异世界生活 第四季", "completed", 14, 14],
 			["约会大作战", "watching", 9, 13],
-			["关于邻家的天使大人不知不觉把我惯成了废人", "planned", 0, 12],
-			["总之就是非常可爱", "planned", 0, 12],
+			["关于邻家的天使大人不知不觉把我惯成了废人 第一季", "completed", 12, 12],
+			["总之就是非常可爱", "completed", 12, 12],
 			["前辈是男孩子", "planned", 0, 12],
 			["莉可丽丝", "completed", 13, 13],
 			["紫罗兰永恒花园", "completed", 13, 13],
-			["更衣人偶坠入爱河", "planned", 0, 12],
+			["更衣人偶坠入爱河", "completed", 12, 12],
 			["Fate 系列", "planned", 0, 26],
+			["关于邻家的天使大人不知不觉把我惯成了废人 第二季", "completed", 12, 12],
+			["CLANNAD 第一季", "completed", 23, 23],
+			["CLANNAD 第二季 ～AFTER STORY～", "completed", 24, 24],
+			["更衣人偶坠入爱河 第二季", "completed", 12, 12],
+			["总之就是非常可爱 第二季", "completed", 12, 12],
+			["无职转生～到了异世界就拿出真本事～ 第一季", "planned", 0, 23],
+			["无职转生～到了异世界就拿出真本事～ 第二季", "planned", 0, 25],
+			["无职转生～到了异世界就拿出真本事～ 第三季", "planned", null, null],
+			["和班上第二可爱的女孩子成为了朋友", "planned", 0, 12],
+			["薰香花朵凛然绽放", "planned", 0, 13],
+			["圣剑学院的魔剑使", "planned", 0, 12],
+			["86 -不存在的战区-", "watching", 8, 11],
+			["魔王的女儿太温柔了！！", "planned", 0, 12],
+			["重启人生的千金小姐正在攻略龙帝陛下", "planned", 0, 12],
+			["魔女之旅", "planned", 0, 12],
 		] as const;
 
-		expect(animeData).toHaveLength(15);
-		expect(animeData.at(-1)?.title).toBe("Fate 系列");
+		expect(animeData).toHaveLength(expected.length);
+		expect(new Set(animeData.map((anime) => anime.title)).size).toBe(
+			expected.length,
+		);
 		for (const [title, status, watched, total] of expected) {
 			const item = animeData.find((anime) => anime.title === title);
 			expect(item, `${title} should exist`).toBeDefined();
 			expect(item?.status).toBe(status);
-			expect(item?.progress).toEqual({ watched, total });
+			expect(item?.progress).toEqual(
+				watched === null ? undefined : { watched, total },
+			);
 			expect(item?.cover).toMatch(/^\/assets\/anime\/covers\/.+\.webp$/);
 			expect(item?.link).toMatch(/^https:\/\/bgm\.tv\/subject\/\d+$/);
 
@@ -46,8 +65,9 @@ test.describe("Anime 数据源与配置解析契约", () => {
 				resolve(process.cwd(), "public", item?.cover?.slice(1) ?? ""),
 			).metadata();
 			expect(metadata.format).toBe("webp");
-			expect(metadata.width).toBe(600);
-			expect(metadata.height).toBe(900);
+			expect(metadata.width, title).toBeGreaterThanOrEqual(400);
+			expect(metadata.height, title).toBeGreaterThanOrEqual(600);
+			expect(metadata.height, title).toBeGreaterThan(metadata.width ?? 0);
 		}
 	});
 

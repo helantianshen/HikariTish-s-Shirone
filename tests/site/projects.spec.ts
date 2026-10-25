@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { registerPersistentShellSync } from "./feature-page";
 
-const PROJECT_COUNT = 11;
+const PROJECT_COUNT = 15;
 const PROJECT_KEYS = [
 	"gateway",
 	"gantry",
 	"oss-sync",
+	"fluxvault",
+	"codex-bailong-desktop-pet",
+	"realmmesh-server",
+	"realmmesh-mod",
 	"cmp",
 	"mcpp",
 	"xim-index",
@@ -29,7 +33,7 @@ test.describe("项目页", () => {
 		);
 		await expect(page.locator(".page-header__title")).toHaveText("项目");
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"11 个项目",
+			"15 个项目",
 		);
 
 		const projectOrder = await page
@@ -103,6 +107,13 @@ test.describe("项目页", () => {
 		).toHaveAttribute("src", "/assets/projects/fish-breeding-manager.webp");
 		await expect(fishBreedingManager).toContainText("v0.2.0 预览版");
 		for (const [key, repository] of [
+			["fluxvault", "https://github.com/helantianshen/FluxVault"],
+			[
+				"codex-bailong-desktop-pet",
+				"https://github.com/helantianshen/codex-bailong-desktop-pet",
+			],
+			["realmmesh-server", "https://github.com/helantianshen/realmmesh-server"],
+			["realmmesh-mod", "https://github.com/helantianshen/realmmesh-mod"],
 			["xim-index", "https://github.com/openxlings/xim-pkgindex"],
 			["mcpp-index", "https://github.com/mcpplibs/mcpp-index"],
 		]) {
