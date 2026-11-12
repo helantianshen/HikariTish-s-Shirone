@@ -35,9 +35,9 @@ test.describe("Anime 数据源与配置解析契约", () => {
 			["CLANNAD 第二季 ～AFTER STORY～", "completed", 24, 24],
 			["更衣人偶坠入爱河 第二季", "completed", 12, 12],
 			["总之就是非常可爱 第二季", "completed", 12, 12],
-			["无职转生～到了异世界就拿出真本事～ 第一季", "planned", 0, 23],
-			["无职转生～到了异世界就拿出真本事～ 第二季", "planned", 0, 25],
-			["无职转生～到了异世界就拿出真本事～ 第三季", "planned", null, null],
+			["无职转生～到了异世界就拿出真本事～ 第一季", "completed", 23, 23],
+			["无职转生～到了异世界就拿出真本事～ 第二季", "completed", 25, 25],
+			["无职转生～到了异世界就拿出真本事～ 第三季 上半部", "completed", 14, 14],
 			["和班上第二可爱的女孩子成为了朋友", "planned", 0, 12],
 			["薰香花朵凛然绽放", "planned", 0, 13],
 			["圣剑学院的魔剑使", "planned", 0, 12],
@@ -45,6 +45,11 @@ test.describe("Anime 数据源与配置解析契约", () => {
 			["魔王的女儿太温柔了！！", "planned", 0, 12],
 			["重启人生的千金小姐正在攻略龙帝陛下", "planned", 0, 12],
 			["魔女之旅", "planned", 0, 12],
+			["狼与香辛料", "planned", 0, 13],
+			["为美好的世界献上祝福！ 第一季", "watching", 1, 10],
+			["为美好的世界献上祝福！ 第二季", "planned", 0, 10],
+			["为美好的世界献上祝福！ 第三季", "planned", 0, 11],
+			["天才王子的赤字国家振兴术", "planned", 0, 12],
 		] as const;
 
 		expect(animeData).toHaveLength(expected.length);
@@ -55,9 +60,7 @@ test.describe("Anime 数据源与配置解析契约", () => {
 			const item = animeData.find((anime) => anime.title === title);
 			expect(item, `${title} should exist`).toBeDefined();
 			expect(item?.status).toBe(status);
-			expect(item?.progress).toEqual(
-				watched === null ? undefined : { watched, total },
-			);
+			expect(item?.progress).toEqual({ watched, total });
 			expect(item?.cover).toMatch(/^\/assets\/anime\/covers\/.+\.webp$/);
 			expect(item?.link).toMatch(/^https:\/\/bgm\.tv\/subject\/\d+$/);
 
@@ -277,8 +280,7 @@ test.describe("Anime 数据源与配置解析契约", () => {
 				keepLastValid: true,
 			},
 		});
-		expect(localList.length).toBe(animeData.length);
-		expect(localList[0].title).toBe("莉可丽丝");
+		expect(localList).toEqual(animeData);
 
 		// 当前快照模式
 		const list = await getAnimeList();

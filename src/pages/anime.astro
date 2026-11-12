@@ -8,6 +8,7 @@ import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { resolveI18nText } from "@utils/i18n-utils";
 import { animeConfig } from "@/config/animeConfig";
+import type { AnimeStatus } from "../data/anime";
 import { getAnimeList } from "../utils/anime-data";
 
 if (!animeConfig.enable) {
@@ -20,7 +21,16 @@ const pageDescription = resolveI18nText(
 	I18nKey.animeBanner,
 );
 
-const animes = await getAnimeList();
+const statusOrder: Record<AnimeStatus, number> = {
+	watching: 0,
+	planned: 1,
+	onHold: 2,
+	dropped: 3,
+	completed: 4,
+};
+const animes = (await getAnimeList()).toSorted(
+	(a, b) => statusOrder[a.status] - statusOrder[b.status],
+);
 ---
 
 <MainGridLayout title={pageTitle} description={pageDescription} page="anime">

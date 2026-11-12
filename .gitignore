@@ -64,6 +64,11 @@ public/assets/anime/covers/*
 !public/assets/anime/covers/seiken-gakuin.webp
 !public/assets/anime/covers/mushoku-tensei-s2.webp
 !public/assets/anime/covers/mushoku-tensei-s3.webp
+!public/assets/anime/covers/spice-and-wolf.webp
+!public/assets/anime/covers/konosuba-s1.webp
+!public/assets/anime/covers/konosuba-s2.webp
+!public/assets/anime/covers/konosuba-s3.webp
+!public/assets/anime/covers/genius-prince.webp
 
 # generated responsive moment thumbnails
 public/assets/moments/thumbnails/*

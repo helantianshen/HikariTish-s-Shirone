@@ -1,14 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * 番剧页功能锁定（pages/anime.astro -> organisms/AnimeSection.svelte，client:only）。
+ * 番剧页功能锁定（pages/anime.astro -> organisms/AnimeSection.svelte）。
  * 交互语言与友链/动态页同构：PageHeader 页内大标题（装饰图标）、
  * 官方 Chips 状态筛选原子（单选、再点取消）、筛选状态 URL 同步（?status=）、
  * LoadingIndicator 三段过渡、加载更多按钮。
- * 布局形态跟随全局文章列表偏好（localStorage `post-list-mode`，DisplaySettings
- * 切换广播 post-list-layout-change 事件）：grid 海报网格 / list 横向卡。
- * 数据来自 src/data/anime.ts（经 utils/anime-data.getAnimeList 稳定顺序），
- * 断言基于当前本地收藏数据集（30 条，封面全部本地化）；站点语言为 zh_CN。
+ * 番剧页有独立的网格与列表偏好，全部列表按观看状态分组。
+ * 断言基于本地收藏数据集，封面全部本地化；站点语言为 zh_CN。
  */
 
 const INITIAL_VISIBLE_COUNT = 12;
@@ -28,7 +26,18 @@ test.describe("番剧页", () => {
 	test("渲染番剧卡片（状态 pill / 评分 / 真实封面 / 进度条）", async ({
 		page,
 	}) => {
-		const first = page.locator(".anime-card").first();
+		const watching = page.locator(".anime-card").first();
+		await expect(watching).toHaveAttribute("data-status", "watching");
+		await expect(watching.locator(".anime-card__title")).toHaveText(
+			"为美好的世界献上祝福！ 第一季",
+		);
+		await expect(watching.locator(".m3-progress--linear")).toHaveCount(1);
+		await expect(watching.locator(".anime-card__progress-text")).toHaveText(
+			"1/10",
+		);
+
+		await page.getByRole("button", { name: "看完", exact: true }).click();
+		const first = page.locator('.anime-card[data-status="completed"]').first();
 		await expect(first).toHaveAttribute("data-status", "completed");
 		await expect(first.locator(".anime-card__title")).toHaveText("莉可丽丝");
 		// 状态 tonal pill（i18n 文案 + 语义色注入）
@@ -49,16 +58,6 @@ test.describe("番剧页", () => {
 		await expect(first.locator(".anime-card__play")).toHaveCount(1);
 		// completed 卡不渲染进度条；watching 卡渲染 determinate 进度 + watched/total
 		await expect(first.locator(".m3-progress--linear")).toHaveCount(0);
-		const watching = page
-			.locator('.anime-card[data-status="watching"]')
-			.first();
-		await expect(watching.locator(".anime-card__title")).toHaveText(
-			"间谍过家家 第二季",
-		);
-		await expect(watching.locator(".m3-progress--linear")).toHaveCount(1);
-		await expect(watching.locator(".anime-card__progress-text")).toHaveText(
-			"4/12",
-		);
 		// 元信息行与题材弱标签
 		await expect(first.locator(".anime-card__meta")).toHaveText(
 			"2022 · A-1 Pictures",
@@ -68,7 +67,7 @@ test.describe("番剧页", () => {
 		);
 	});
 
-	test("页头与站点统一视觉结构（PageHeader + 状态筛选 chips）", async ({
+	test("显示页头、状态筛选，并按在看、想看、看完的顺序排列", async ({
 		page,
 	}) => {
 		await expect(page.locator(".page-header")).toHaveCount(1);
@@ -77,7 +76,21 @@ test.describe("番剧页", () => {
 		// 官方 Chips 原子（filter 形态 + 状态前置图标），只列数据中出现的状态
 		const chips = page.locator(".anime-section__chips .m3-chip--filter");
 		await expect(chips).toHaveCount(3);
-		await expect(page.locator(".anime-section__count")).toHaveText("30 部番剧");
+		await expect(page.locator(".anime-section__count")).toHaveText("35 部番剧");
+
+		const loadMore = page.getByRole("button", { name: "加载更多" });
+		await loadMore.click();
+		await loadMore.click();
+		const cards = page.locator(".anime-card");
+		await expect(cards).toHaveCount(35);
+		const statuses = await cards.evaluateAll((elements) =>
+			elements.map((card) => card.getAttribute("data-status")),
+		);
+		expect(statuses).toEqual([
+			...Array(5).fill("watching"),
+			...Array(12).fill("planned"),
+			...Array(18).fill("completed"),
+		]);
 	});
 
 	test("单选状态筛选（再点取消恢复全部，aria-pressed 同步 + URL ?status=）", async ({
@@ -90,8 +103,8 @@ test.describe("番剧页", () => {
 		await watchingChip.click();
 		await expect(watchingChip).toHaveAttribute("aria-pressed", "true");
 		await expect(page).toHaveURL(/[?&]status=watching/);
-		await expect(page.locator(".anime-card")).toHaveCount(4);
-		await expect(page.locator(".anime-section__count")).toHaveText("4 部番剧");
+		await expect(page.locator(".anime-card")).toHaveCount(5);
+		await expect(page.locator(".anime-section__count")).toHaveText("5 部番剧");
 		await watchingChip.click();
 		await expect(watchingChip).toHaveAttribute("aria-pressed", "false");
 		await expect(page.locator(".anime-card")).toHaveCount(
@@ -111,7 +124,7 @@ test.describe("番剧页", () => {
 		await expect(page.locator(".anime-card")).toHaveCount(
 			INITIAL_VISIBLE_COUNT,
 		);
-		await expect(page.locator(".anime-section__count")).toHaveText("15 部番剧");
+		await expect(page.locator(".anime-section__count")).toHaveText("18 部番剧");
 		await expect(page.locator(".anime-card__title").first()).toHaveText(
 			"莉可丽丝",
 		);
@@ -130,19 +143,20 @@ test.describe("番剧页", () => {
 			page.locator(".anime-section__loading .m3-loading--contained"),
 		).toBeVisible();
 		// 过渡收敛后展示 planned 收藏
-		await expect(page.locator(".anime-card")).toHaveCount(11);
+		await expect(page.locator(".anime-card")).toHaveCount(12);
 		await expect(page.locator(".anime-card__title")).toHaveText([
 			"前辈是男孩子",
 			"Fate 系列",
-			"无职转生～到了异世界就拿出真本事～ 第一季",
-			"无职转生～到了异世界就拿出真本事～ 第二季",
-			"无职转生～到了异世界就拿出真本事～ 第三季",
 			"魔王的女儿太温柔了！！",
 			"重启人生的千金小姐正在攻略龙帝陛下",
 			"魔女之旅",
 			"和班上第二可爱的女孩子成为了朋友",
 			"薰香花朵凛然绽放",
 			"圣剑学院的魔剑使",
+			"狼与香辛料",
+			"为美好的世界献上祝福！ 第二季",
+			"为美好的世界献上祝福！ 第三季",
+			"天才王子的赤字国家振兴术",
 		]);
 		await expect(page.locator(".anime-section__loading")).toHaveCount(0);
 	});
